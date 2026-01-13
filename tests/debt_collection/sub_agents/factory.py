@@ -6,6 +6,7 @@ Creates and configures all agents with their instructions and tools.
 
 from pathlib import Path
 from typing import Optional
+from datetime import datetime, date
 import yaml
 
 # Import from specific modules to avoid circular imports
@@ -47,10 +48,21 @@ def build_prompt_variables(agent_id: str, userdata: Optional[UserData] = None) -
     agent_name = variables.get("default_agent_name", "Alex")
 
     default_authority = AUTHORITIES.get("cartrack", {})
+
+    # Add date/time context so agents know the current date/time
+    now = datetime.now()
+    today = date.today()
+
     base_vars = {
         "agent_name": agent_name,
         "authority": default_authority.get("name", "Cartrack Accounts Department"),
         "authority_contact": default_authority.get("contact", "011-250-3000"),
+        # Date/time context for agents
+        "today": today.strftime("%Y-%m-%d"),
+        "today_friendly": today.strftime("%A, %B %d, %Y"),
+        "current_time": now.strftime("%H:%M"),
+        "current_day": today.strftime("%A"),
+        "is_before_2pm": now.hour < 14,
     }
 
     if not userdata:

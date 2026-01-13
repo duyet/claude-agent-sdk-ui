@@ -19,7 +19,7 @@ import yaml
 from livekit.agents import AgentServer, JobContext, cli, AutoSubscribe, RoomOutputOptions
 from livekit.agents.voice import AgentSession
 from livekit.agents.voice.events import FunctionToolsExecutedEvent
-from livekit.plugins import deepgram, openai, silero, cartesia, assemblyai
+from livekit.plugins import silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from dotenv import load_dotenv
 
@@ -29,14 +29,12 @@ sys.path.insert(0, str(_current_dir.parent))
 
 load_dotenv(_current_dir.parent / ".env", override=True)
 
-# Custom TTS plugins
-from livekit_custom_plugins import chatterbox_tts
-
 # Agent imports
 from sub_agents import INTRODUCTION, create_agents
 from shared_state import UserData, DebtorProfile, CallState, get_test_debtor
 from business_rules.config import AUTHORITIES, SCRIPT_TYPES
 from utils.id_generator import generate_session_id
+from model_provider import create_llm, create_stt, create_tts
 
 # ============================================
 # CONFIGURATION
@@ -49,62 +47,6 @@ CONFIG = yaml.safe_load(config_path.read_text()) if config_path.exists() else {}
 # Server
 DEFAULT_PORT = 8083
 MAX_TOOL_STEPS = 5
-
-
-# ============================================
-# STT FACTORY
-# ============================================
-def create_stt():
-    """Create STT instance from config."""
-    stt_cfg = CONFIG["stt"]
-    provider = stt_cfg["provider"]
-
-    if provider == "assemblyai":
-        return assemblyai.STT()
-    return deepgram.STT(model=stt_cfg["model"])
-
-
-# ============================================
-# TTS FACTORY
-# ============================================
-def create_tts():
-    """Create TTS instance from config."""
-    tts_cfg = CONFIG["tts"]
-    provider = tts_cfg["provider"]
-    cfg = tts_cfg[provider]
-
-    if provider == "cartesia":
-        return cartesia.TTS(
-            model=cfg["model"],
-            voice=cfg["voice"],
-            speed=cfg["speed"],
-            language=cfg["language"],
-        )
-    if provider == "kokoro_tts":
-        from livekit_custom_plugins import kokoro_tts
-        return kokoro_tts.TTS(
-            api_url=cfg["api_url"],
-            voice=cfg["voice"],
-            speed=cfg["speed"],
-            normalize_text=cfg["normalize_text"],
-        )
-    if provider == "supertonic_tts":
-        from livekit_custom_plugins import supertonic_tts
-        return supertonic_tts.TTS(
-            api_url=cfg["api_url"],
-            voice_style=cfg["voice_style"],
-            speed=cfg["speed"],
-            total_step=cfg["total_step"],
-            silence_duration=cfg["silence_duration"],
-        )
-    # chatterbox_tts
-    return chatterbox_tts.TTS(
-        api_url=cfg["api_url"],
-        audio_prompt_path=cfg["audio_prompt_path"],
-        exaggeration=cfg["exaggeration"],
-        cfg_weight=cfg["cfg_weight"],
-        normalize_text=cfg["normalize_text"],
-    )
 
 
 # ============================================
@@ -146,18 +88,12 @@ async def entrypoint(ctx: JobContext):
     userdata.agents = create_agents(userdata)
     logger.info(f"Initialized {len(userdata.agents)} agents")
 
-    # Create session with configurable STT/TTS
-    llm_cfg = CONFIG.get("llm", {})
-
+    # Create session with configurable LLM/STT/TTS
     session = AgentSession[UserData](
         userdata=userdata,
-        llm=openai.LLM(
-            model=llm_cfg.get("model", "gpt-4o-mini"),
-            temperature=llm_cfg.get("temperature", 0.7),
-            parallel_tool_calls=False,
-        ),
-        stt=create_stt(),
-        tts=create_tts(),
+        llm=create_llm(CONFIG),
+        stt=create_stt(CONFIG),
+        tts=create_tts(CONFIG),
         vad=silero.VAD.load(),
         turn_detection=MultilingualModel(),
         max_tool_steps=MAX_TOOL_STEPS,

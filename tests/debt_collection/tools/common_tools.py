@@ -12,6 +12,7 @@ from livekit.agents.llm import function_tool, ToolError
 from livekit.agents.voice import Agent, RunContext
 
 from utils.fuzzy_match import fuzzy_match as _fuzzy_match_comprehensive
+from utils.date_parser import parse_spoken_date, parse_spoken_time, format_date_friendly, format_time_friendly
 from shared_state import UserData
 from business_rules import BUSINESS_HOURS
 from state.types import CallOutcome
@@ -75,28 +76,61 @@ def validate_business_hours(date_str: str, time_str: str) -> tuple[bool, str]:
 
 @function_tool()
 async def schedule_callback(
-    date: Annotated[str, Field(description="Callback date in YYYY-MM-DD format (e.g., '2025-12-15')")],
-    time: Annotated[str, Field(description="Callback time in HH:MM format (e.g., '14:30')")],
+    callback_date: Annotated[str, Field(description="Callback date - natural language like 'tomorrow', 'next Monday', 'the 25th', or YYYY-MM-DD format")],
+    callback_time: Annotated[str, Field(description="Callback time - natural language like 'morning', '2 PM', 'afternoon', or HH:MM format")],
     context: RunContext_T,
 ) -> tuple[Agent, str] | Agent | str:
     """
     Schedule a callback for the customer.
 
-    Validates business hours and transfers to closing.
+    Accepts natural language dates and times:
+    - Dates: "tomorrow", "next Monday", "the 25th", "next week", or YYYY-MM-DD
+    - Times: "morning" (9 AM), "afternoon" (2 PM), "2 PM", "14:30"
+
+    Validates business hours (Mon-Sat 07:00-18:00) and transfers to closing.
 
     Usage: Call when customer requests callback or is unavailable now.
     """
     userdata = context.userdata
 
-    is_valid, error_msg = validate_business_hours(date, time)
+    # Parse natural language date
+    parsed_date = parse_spoken_date(callback_date)
+    if parsed_date is None:
+        # Try parsing as YYYY-MM-DD format (fallback)
+        try:
+            parsed_date = datetime.strptime(callback_date, "%Y-%m-%d").date()
+        except ValueError:
+            return f"I couldn't understand the date '{callback_date}'. Could you say something like 'tomorrow', 'next Monday', or 'the 25th'?"
+
+    # Parse natural language time
+    parsed_time = parse_spoken_time(callback_time)
+    if parsed_time is None:
+        # Try parsing as HH:MM format (fallback)
+        try:
+            parsed_time = datetime.strptime(callback_time, "%H:%M").time()
+        except ValueError:
+            return f"I couldn't understand the time '{callback_time}'. Could you say something like 'morning', '2 PM', or 'afternoon'?"
+
+    # Convert to string format for validation
+    date_str = parsed_date.strftime("%Y-%m-%d")
+    time_str = parsed_time.strftime("%H:%M")
+
+    is_valid, error_msg = validate_business_hours(date_str, time_str)
     if not is_valid:
         start = BUSINESS_HOURS["start"].strftime("%H:%M")
         end = BUSINESS_HOURS["end"].strftime("%H:%M")
-        return f"Cannot schedule callback: {error_msg}. Please provide a valid date and time during business hours (Mon-Sat, {start}-{end})."
+        friendly_date = format_date_friendly(parsed_date)
+        friendly_time = format_time_friendly(parsed_time)
+        return f"I can't schedule a callback for {friendly_date} at {friendly_time}: {error_msg}. Our business hours are Monday to Saturday, {start} to {end}. When would work better for you?"
 
     userdata.call.callback_scheduled = True
-    userdata.call.callback_datetime = f"{date}T{time}"
+    userdata.call.callback_datetime = f"{date_str}T{time_str}"
     userdata.call.call_outcome = CallOutcome.CALLBACK
+
+    # Provide friendly confirmation
+    friendly_date = format_date_friendly(parsed_date)
+    friendly_time = format_time_friendly(parsed_time)
+    userdata.call.append_call_notes(f"Callback scheduled for {friendly_date} at {friendly_time}")
 
     return await transfer_to_agent("closing", context)
 
