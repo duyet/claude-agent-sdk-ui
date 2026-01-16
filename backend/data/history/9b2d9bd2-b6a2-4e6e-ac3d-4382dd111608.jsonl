@@ -1,8 +1,0 @@
-{"id": "user-2026-01-16T18:51:56.417801", "role": "user", "content": "i am khoa", "timestamp": "2026-01-16T18:51:56.417817Z"}
-{"id": "assistant-2026-01-16T18:51:56.418184", "role": "assistant", "content": "Hello Khoa! Nice to meet you. How can I help you today with your Claude Agent SDK project or anything else?", "timestamp": "2026-01-16T18:51:56.418191Z"}
-{"id": "user-2026-01-16T18:52:06.545399", "role": "user", "content": "hello", "timestamp": "2026-01-16T18:52:06.545422Z"}
-{"id": "assistant-2026-01-16T18:52:06.545784", "role": "assistant", "content": "Hello Khoa! \ud83d\udc4b\n\nHow can I help you today with your project? I'm here to assist with the Claude Agent SDK application, your Next.js frontend, or any other development tasks you'd like to work on.", "timestamp": "2026-01-16T18:52:06.545799Z"}
-{"id": "user-2026-01-16T18:52:52.837892", "role": "user", "content": "what is my name", "timestamp": "2026-01-16T18:52:52.837909Z"}
-{"id": "assistant-2026-01-16T18:52:52.838158", "role": "assistant", "content": "Your name is **Khoa**! \ud83d\ude0a", "timestamp": "2026-01-16T18:52:52.838163Z"}
-{"id": "user-2026-01-16T18:52:59.882944", "role": "user", "content": "hello", "timestamp": "2026-01-16T18:52:59.882949Z"}
-{"id": "assistant-2026-01-16T18:52:59.883011", "role": "assistant", "content": "Hello Khoa! How can I help you with your project today?", "timestamp": "2026-01-16T18:52:59.883012Z"}
