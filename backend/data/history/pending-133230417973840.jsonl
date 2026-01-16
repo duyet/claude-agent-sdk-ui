@@ -1,4 +1,0 @@
-{"id": "user-2026-01-16T14:27:53.878987", "role": "user", "content": "hi", "timestamp": "2026-01-16T14:27:53.879005Z"}
-{"id": "assistant-2026-01-16T14:27:53.879380", "role": "assistant", "content": "Hello! How can I help you with your Claude Agent SDK project today?", "timestamp": "2026-01-16T14:27:53.879388Z"}
-{"id": "user-2026-01-16T14:30:46.730575", "role": "user", "content": "i am Trung", "timestamp": "2026-01-16T14:30:46.730584Z"}
-{"id": "assistant-2026-01-16T14:30:46.730720", "role": "assistant", "content": "Nice to meet you, Trung! I'm ready to help you with your Claude Agent SDK project. \n\nIs there anything specific you'd like to work on, such as:\n- Setting up or configuring the project\n- Building new features\n- Debugging issues\n- Understanding the codebase\n- Something else?\n\nJust let me know what you need!", "timestamp": "2026-01-16T14:30:46.730723Z"}
