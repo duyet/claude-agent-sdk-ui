@@ -33,5 +33,26 @@
     "created_at": "2026-01-21T17:32:47.547510",
     "turn_count": 1,
     "user_id": null
+  },
+  {
+    "session_id": "9d5e8d3b-4991-46ab-a541-e5a778f07784",
+    "first_message": "hi",
+    "created_at": "2026-01-21T17:40:02.634913",
+    "turn_count": 3,
+    "user_id": null
+  },
+  {
+    "session_id": "348ae61e-da70-40b5-ad2f-e85e82cf4263",
+    "first_message": "hi, what is current folder",
+    "created_at": "2026-01-21T17:41:19.815008",
+    "turn_count": 1,
+    "user_id": null
+  },
+  {
+    "session_id": "0dc4cc01-5760-4a77-a381-e373032398b4",
+    "first_message": "hi",
+    "created_at": "2026-01-21T17:42:04.613029",
+    "turn_count": 0,
+    "user_id": null
   }
 ]
