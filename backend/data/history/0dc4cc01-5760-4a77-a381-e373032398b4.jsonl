@@ -1,2 +1,0 @@
-{"role": "user", "content": "hi", "timestamp": "2026-01-21T17:42:04.613215", "message_id": null, "tool_name": null, "tool_use_id": null, "is_error": false, "metadata": {}}
-{"role": "assistant", "content": "Hi! How can I help you today?", "timestamp": "2026-01-21T17:42:07.325329", "message_id": null, "tool_name": null, "tool_use_id": null, "is_error": false, "metadata": {}}
