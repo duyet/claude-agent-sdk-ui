@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
+import { QueuedMessagesIndicator } from './queued-messages-indicator';
+import { useMessageQueueStore } from '@/lib/store/message-queue-store';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -10,7 +12,21 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const [queueLength, setQueueLength] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const getQueueLength = useMessageQueueStore((s) => s.getQueueLength);
+
+  // Update queue length periodically
+  useEffect(() => {
+    const updateQueueLength = () => {
+      setQueueLength(getQueueLength());
+    };
+
+    updateQueueLength();
+    const interval = setInterval(updateQueueLength, 1000);
+
+    return () => clearInterval(interval);
+  }, [getQueueLength]);
 
   const handleSubmit = () => {
     if (message.trim() && !disabled) {
@@ -33,13 +49,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   return (
     <div className="bg-background px-2 sm:px-4 py-3">
       <div className="mx-auto max-w-3xl">
+        {/* Show queued messages indicator if there are queued messages */}
+        {queueLength > 0 && (
+          <div className="mb-2">
+            <QueuedMessagesIndicator />
+          </div>
+        )}
         <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2 shadow-sm">
           <textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Claude..."
+            placeholder={queueLength > 0 ? "Message will be queued until connected..." : "Message Claude..."}
             className="chat-textarea flex-1 min-h-[60px] max-h-[200px] resize-none bg-transparent px-3 py-2 text-base md:text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled}
           />

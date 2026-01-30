@@ -1,19 +1,19 @@
 'use client';
+
 import { useState } from 'react';
 import { useAgents } from '@/hooks/use-agents';
 import { useChatStore } from '@/lib/store/chat-store';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Bot, Sparkles, Send } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Bot, Send, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function AgentGrid() {
   const { data: agents, isLoading, error } = useAgents();
   const setAgentId = useChatStore((s) => s.setAgentId);
   const setPendingMessage = useChatStore((s) => s.setPendingMessage);
   const [message, setMessage] = useState('');
+  const [hoveredAgent, setHoveredAgent] = useState<string | null>(null);
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
@@ -34,24 +34,19 @@ export function AgentGrid() {
     }
   };
 
+  const handleAgentClick = (agentId: string) => {
+    setAgentId(agentId);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-4xl p-8">
-          <div className="mb-8 text-center">
-            <Skeleton className="mx-auto h-16 w-16 rounded-full" />
-            <Skeleton className="mx-auto mt-4 h-8 w-48" />
-            <Skeleton className="mx-auto mt-2 h-4 w-96" />
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="p-6">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="mt-4 h-4 w-full" />
-                <Skeleton className="mt-2 h-4 w-3/4" />
-              </Card>
-            ))}
-          </div>
+      <div className="flex h-full flex-col items-center justify-center p-8">
+        <Skeleton className="h-10 w-64 mb-4" />
+        <Skeleton className="h-4 w-48 mb-8" />
+        <div className="flex flex-wrap justify-center gap-2 max-w-xl">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-9 w-32 rounded-full" />
+          ))}
         </div>
       </div>
     );
@@ -59,7 +54,7 @@ export function AgentGrid() {
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <p className="text-destructive">Failed to load agents. Please try again.</p>
         </div>
@@ -68,94 +63,89 @@ export function AgentGrid() {
   }
 
   const defaultAgent = agents?.find((a) => a.is_default);
-  const otherAgents = agents?.filter((a) => !a.is_default) || [];
+  const sortedAgents = agents ? [
+    ...(defaultAgent ? [defaultAgent] : []),
+    ...agents.filter((a) => !a.is_default)
+  ] : [];
 
   return (
     <div className="flex h-full flex-col">
-      <ScrollArea className="flex-1">
-        <div className="container mx-auto max-w-4xl p-8">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold">Welcome to Claude Agent SDK</h1>
-            <p className="mt-2 text-muted-foreground">Select an agent or start typing to begin</p>
+      {/* Centered welcome content */}
+      <div className="flex flex-1 flex-col items-center justify-center px-4 pb-24">
+        <div className="w-full max-w-2xl space-y-8">
+          {/* Greeting */}
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-foreground">
+              What can I help you with?
+            </h1>
           </div>
 
-        <div className="space-y-4">
-          {defaultAgent && (
-            <Card
-              className="cursor-pointer border-primary/50 bg-primary/5 transition-colors hover:bg-primary/10"
-              onClick={() => setAgentId(defaultAgent.agent_id)}
-            >
-              <div className="flex items-start gap-4 p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-                  <Bot className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{defaultAgent.name}</h3>
-                    <Badge variant="default" className="text-xs">
-                      Default
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{defaultAgent.description}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">Model: {defaultAgent.model}</p>
-                </div>
-              </div>
-            </Card>
-          )}
+          {/* Agent pills */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {sortedAgents.map((agent) => (
+              <button
+                key={agent.agent_id}
+                onClick={() => handleAgentClick(agent.agent_id)}
+                onMouseEnter={() => setHoveredAgent(agent.agent_id)}
+                onMouseLeave={() => setHoveredAgent(null)}
+                className={cn(
+                  'group flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all',
+                  'hover:border-primary hover:bg-primary/5',
+                  agent.is_default && 'border-primary/50 bg-primary/5'
+                )}
+              >
+                <Bot className="size-4 text-muted-foreground group-hover:text-primary" />
+                <span className="font-medium">{agent.name}</span>
+                {agent.is_default && (
+                  <span className="text-[10px] text-muted-foreground">default</span>
+                )}
+                <ArrowRight className={cn(
+                  'size-3.5 text-muted-foreground transition-all',
+                  hoveredAgent === agent.agent_id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'
+                )} />
+              </button>
+            ))}
+          </div>
 
-          {otherAgents.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2">
-              {otherAgents.map((agent) => (
-                <Card
-                  key={agent.agent_id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => setAgentId(agent.agent_id)}
-                >
-                  <div className="flex items-start gap-4 p-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                      <Bot className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="mb-2 text-lg font-semibold">{agent.name}</h3>
-                      <p className="text-sm text-muted-foreground">{agent.description}</p>
-                      <p className="mt-2 text-xs text-muted-foreground">Model: {agent.model}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+          {/* Agent description tooltip */}
+          {hoveredAgent && (
+            <div className="text-center animate-in fade-in duration-150">
+              <p className="text-sm text-muted-foreground">
+                {agents?.find((a) => a.agent_id === hoveredAgent)?.description}
+              </p>
             </div>
           )}
         </div>
       </div>
-    </ScrollArea>
 
-    {/* Chat input */}
-    <div className="bg-background px-4 py-3">
-      <div className="mx-auto max-w-3xl">
-        <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2 shadow-sm">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Message Claude..."
-            className="chat-textarea flex-1 min-h-[60px] max-h-[200px] resize-none bg-transparent px-3 py-2 text-base md:text-sm placeholder:text-muted-foreground"
-            style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-            disabled={isLoading || !agents?.length}
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!message.trim() || isLoading || !agents?.length}
-            size="icon"
-            className="h-10 w-10 shrink-0 rounded-xl bg-primary text-white hover:bg-primary-hover disabled:opacity-50"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+      {/* Chat input */}
+      <div className="sticky bottom-0 border-t bg-background px-4 py-3">
+        <div className="mx-auto max-w-2xl">
+          <div className="flex items-end gap-2 rounded-xl border bg-background p-2 shadow-sm focus-within:ring-1 focus-within:ring-ring">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Message Claude..."
+              rows={1}
+              className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none"
+              style={{ minHeight: '36px', maxHeight: '200px' }}
+              disabled={isLoading || !agents?.length}
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={!message.trim() || isLoading || !agents?.length}
+              size="icon"
+              className="h-8 w-8 shrink-0 rounded-lg"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Press Enter to send, Shift+Enter for new line
+          </p>
         </div>
       </div>
     </div>
-  </div>
   );
 }
