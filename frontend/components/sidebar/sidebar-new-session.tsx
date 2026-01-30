@@ -1,23 +1,19 @@
-'use client';
+"use client"
 
-import { Plus } from 'lucide-react';
-import { useChatStore } from '@/lib/store/chat-store';
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from '@/components/ui/sidebar';
+import { Plus } from "lucide-react"
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import { useChatStore } from "@/lib/store/chat-store"
 
 export function SidebarNewSession() {
-  const setSessionId = useChatStore((s) => s.setSessionId);
-  const setAgentId = useChatStore((s) => s.setAgentId);
-  const clearMessages = useChatStore((s) => s.clearMessages);
+  const setSessionId = useChatStore(s => s.setSessionId)
+  const setAgentId = useChatStore(s => s.setAgentId)
+  const clearMessages = useChatStore(s => s.clearMessages)
 
   const handleNewSession = () => {
-    setSessionId(null);
-    setAgentId(null);
-    clearMessages();
-  };
+    setSessionId(null)
+    setAgentId(null)
+    clearMessages()
+  }
 
   return (
     <SidebarMenu>
@@ -28,5 +24,5 @@ export function SidebarNewSession() {
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
+  )
 }

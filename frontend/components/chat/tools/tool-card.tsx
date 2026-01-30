@@ -1,40 +1,40 @@
-'use client';
+"use client"
 
-import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { cn, formatTime } from '@/lib/utils';
-import { ToolStatusBadge, type ToolStatus } from './tool-status-badge';
+import type { LucideIcon } from "lucide-react"
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react"
+import type { ReactNode } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { cn, formatTime } from "@/lib/utils"
+import { type ToolStatus, ToolStatusBadge } from "./tool-status-badge"
 
 interface ToolCardProps {
   /** Tool name displayed in the header */
-  toolName: string;
+  toolName: string
   /** Tool icon component */
-  ToolIcon: LucideIcon;
+  ToolIcon: LucideIcon
   /** Border and icon color (CSS color value) */
-  color?: string;
+  color?: string
   /** Current execution status */
-  status: ToolStatus;
+  status: ToolStatus
   /** Whether the card is expanded */
-  isExpanded: boolean;
+  isExpanded: boolean
   /** Toggle expansion callback */
-  onToggle: () => void;
+  onToggle: () => void
   /** Summary text shown when collapsed */
-  summary?: string;
+  summary?: string
   /** Optional timestamp to display */
-  timestamp?: Date;
+  timestamp?: Date
   /** Whether the tool is currently running (adds animation) */
-  isRunning?: boolean;
+  isRunning?: boolean
   /** Card content (shown when expanded) */
-  children?: ReactNode;
+  children?: ReactNode
   /** Additional className for the outer container */
-  className?: string;
+  className?: string
   /** Accessibility label for the card */
-  ariaLabel?: string;
+  ariaLabel?: string
   /** Unique ID for accessibility controls */
-  toolId?: string;
+  toolId?: string
 }
 
 /**
@@ -56,29 +56,38 @@ export function ToolCard({
   ariaLabel,
   toolId,
 }: ToolCardProps) {
-  const borderColor = color || 'hsl(var(--border))';
-  const iconColor = color || 'hsl(var(--muted-foreground))';
+  const borderColor = color || "hsl(var(--border))"
+  const iconColor = color || "hsl(var(--muted-foreground))"
 
   // Generate aria-label if not provided
-  const computedAriaLabel = ariaLabel || (() => {
-    const statusText = status === 'running' ? 'running' : status === 'completed' ? 'completed' : status === 'error' ? 'failed' : 'pending';
-    const summaryText = summary ? `: ${summary}` : '';
-    return `${toolName} tool ${statusText}${summaryText}`;
-  })();
+  const computedAriaLabel =
+    ariaLabel ||
+    (() => {
+      const statusText =
+        status === "running"
+          ? "running"
+          : status === "completed"
+            ? "completed"
+            : status === "error"
+              ? "failed"
+              : "pending"
+      const summaryText = summary ? `: ${summary}` : ""
+      return `${toolName} tool ${statusText}${summaryText}`
+    })()
 
-  const detailsId = toolId || `tool-details-${toolName}-${Date.now()}`;
+  const detailsId = toolId || `tool-details-${toolName}-${Date.now()}`
 
   return (
     <div
-      className={cn('group flex gap-2 sm:gap-3 py-1.5 px-2 sm:px-4', className)}
+      className={cn("group flex gap-2 sm:gap-3 py-1.5 px-2 sm:px-4", className)}
       role="article"
       aria-label={computedAriaLabel}
     >
       {/* Icon column */}
       <div
         className={cn(
-          'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border',
-          isRunning && 'animate-pulse'
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border",
+          isRunning && "animate-pulse",
         )}
         style={{ color: iconColor }}
         aria-hidden="true"
@@ -137,7 +146,7 @@ export function ToolCard({
           <div
             className={cn(
               "grid transition-all duration-200 ease-out",
-              isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
             )}
           >
             <div className="overflow-hidden">
@@ -158,28 +167,28 @@ export function ToolCard({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 interface NonCollapsibleToolCardProps {
   /** Tool name displayed in the header */
-  toolName: string;
+  toolName: string
   /** Tool icon component */
-  ToolIcon: LucideIcon;
+  ToolIcon: LucideIcon
   /** Border and icon color (CSS color value) */
-  color?: string;
+  color?: string
   /** Whether the tool is currently running */
-  isRunning?: boolean;
+  isRunning?: boolean
   /** Optional timestamp */
-  timestamp?: Date;
+  timestamp?: Date
   /** Header content (right side) */
-  headerContent?: ReactNode;
+  headerContent?: ReactNode
   /** Card content (always visible) */
-  children?: ReactNode;
+  children?: ReactNode
   /** Additional className */
-  className?: string;
+  className?: string
   /** Accessibility label for the card */
-  ariaLabel?: string;
+  ariaLabel?: string
 }
 
 /**
@@ -197,20 +206,20 @@ export function NonCollapsibleToolCard({
   className,
   ariaLabel,
 }: NonCollapsibleToolCardProps) {
-  const borderColor = color || 'hsl(var(--border))';
-  const iconColor = color || 'hsl(var(--muted-foreground))';
+  const borderColor = color || "hsl(var(--border))"
+  const iconColor = color || "hsl(var(--muted-foreground))"
 
   return (
     <div
-      className={cn('group flex gap-2 sm:gap-3 py-1.5 px-2 sm:px-4', className)}
+      className={cn("group flex gap-2 sm:gap-3 py-1.5 px-2 sm:px-4", className)}
       role="article"
       aria-label={ariaLabel}
     >
       {/* Icon column */}
       <div
         className={cn(
-          'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border',
-          isRunning && 'animate-pulse'
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border",
+          isRunning && "animate-pulse",
         )}
         style={{ color: iconColor }}
         aria-hidden="true"
@@ -250,5 +259,5 @@ export function NonCollapsibleToolCard({
         )}
       </div>
     </div>
-  );
+  )
 }

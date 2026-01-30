@@ -1,39 +1,39 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import type { ChatMessage } from '@/types';
-import type { LucideIcon } from 'lucide-react';
-import { formatTime, cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import type { LucideIcon } from "lucide-react"
 import {
+  AlertCircle,
+  Check,
+  CheckCircle,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Loader2,
   Circle,
   CircleDot,
-  CheckCircle2,
   ClipboardList,
-  CheckCircle,
-  AlertCircle,
-  MessageSquare,
-  Check,
   Clock,
-} from 'lucide-react';
-import { getToolIcon, getToolColorStyles, getToolSummary } from '@/lib/tool-config';
+  Loader2,
+  MessageSquare,
+} from "lucide-react"
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { getToolColorStyles, getToolIcon, getToolSummary } from "@/lib/tool-config"
+import { cn, formatTime } from "@/lib/utils"
+import type { ChatMessage } from "@/types"
 import {
-  ToolCard,
   NonCollapsibleToolCard,
+  RunningIndicator,
+  ToolCard,
   ToolInputDisplay,
   ToolResultDisplay,
-  RunningIndicator,
   type ToolStatus,
-} from './tools';
+} from "./tools"
 
 interface ToolUseMessageProps {
-  message: ChatMessage;
-  isRunning?: boolean;
-  result?: ChatMessage;
+  message: ChatMessage
+  isRunning?: boolean
+  result?: ChatMessage
 }
 
 /**
@@ -41,26 +41,26 @@ interface ToolUseMessageProps {
  * Delegates to specialized display components for specific tools.
  */
 export function ToolUseMessage({ message, isRunning = false, result }: ToolUseMessageProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false)
 
-  const toolName = message.toolName || '';
-  const ToolIcon = getToolIcon(toolName);
-  const colorStyles = getToolColorStyles(toolName);
-  const summary = getToolSummary(toolName, message.toolInput);
-  const hasResult = !!result;
-  const isError = result?.isError;
+  const toolName = message.toolName || ""
+  const ToolIcon = getToolIcon(toolName)
+  const colorStyles = getToolColorStyles(toolName)
+  const summary = getToolSummary(toolName, message.toolInput)
+  const hasResult = !!result
+  const isError = result?.isError
 
   // Derive status from state
   const status: ToolStatus = isRunning
-    ? 'running'
+    ? "running"
     : hasResult
       ? isError
-        ? 'error'
-        : 'completed'
-      : 'pending';
+        ? "error"
+        : "completed"
+      : "pending"
 
   // Special rendering for TodoWrite - always visible, no accordion
-  if (toolName === 'TodoWrite') {
+  if (toolName === "TodoWrite") {
     return (
       <TodoWriteDisplay
         message={message}
@@ -68,21 +68,21 @@ export function ToolUseMessage({ message, isRunning = false, result }: ToolUseMe
         ToolIcon={ToolIcon}
         colorStyles={colorStyles}
       />
-    );
+    )
   }
 
   // Special rendering for EnterPlanMode - always visible planning indicator
-  if (toolName === 'EnterPlanMode') {
-    return <EnterPlanModeDisplay message={message} isRunning={isRunning} />;
+  if (toolName === "EnterPlanMode") {
+    return <EnterPlanModeDisplay message={message} isRunning={isRunning} />
   }
 
   // Special rendering for ExitPlanMode - always visible plan summary
-  if (toolName === 'ExitPlanMode') {
-    return <ExitPlanModeDisplay message={message} isRunning={isRunning} />;
+  if (toolName === "ExitPlanMode") {
+    return <ExitPlanModeDisplay message={message} isRunning={isRunning} />
   }
 
   // Special rendering for AskUserQuestion - always visible with tabs and answer
-  if (toolName === 'AskUserQuestion') {
+  if (toolName === "AskUserQuestion") {
     return (
       <AskUserQuestionDisplay
         message={message}
@@ -90,11 +90,11 @@ export function ToolUseMessage({ message, isRunning = false, result }: ToolUseMe
         colorStyles={colorStyles}
         answer={result?.content}
       />
-    );
+    )
   }
 
   // Standard collapsible tool card
-  if (!message.toolInput) return null;
+  if (!message.toolInput) return null
 
   return (
     <ToolCard
@@ -119,13 +119,20 @@ export function ToolUseMessage({ message, isRunning = false, result }: ToolUseMe
 
       {/* Tool Result */}
       {hasResult && (
-        <div className="p-2 sm:p-3" role="region" aria-label={isError ? 'Tool error output' : 'Tool output'}>
+        <div
+          className="p-2 sm:p-3"
+          role="region"
+          aria-label={isError ? "Tool error output" : "Tool output"}
+        >
           <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
             <span className="text-xs sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
               Output
             </span>
             {isError && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20" role="alert">
+              <span
+                className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20"
+                role="alert"
+              >
                 Error
               </span>
             )}
@@ -142,16 +149,16 @@ export function ToolUseMessage({ message, isRunning = false, result }: ToolUseMe
         </div>
       )}
     </ToolCard>
-  );
+  )
 }
 
 // --- Special Tool Display Components ---
 
 interface TodoWriteDisplayProps {
-  message: ChatMessage;
-  isRunning: boolean;
-  ToolIcon: LucideIcon;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
+  message: ChatMessage
+  isRunning: boolean
+  ToolIcon: LucideIcon
+  colorStyles: ReturnType<typeof getToolColorStyles>
 }
 
 /**
@@ -160,38 +167,40 @@ interface TodoWriteDisplayProps {
 function TodoWriteDisplay({ message, isRunning, ToolIcon, colorStyles }: TodoWriteDisplayProps) {
   const todos = message.toolInput?.todos as
     | Array<{
-        content?: string;
-        subject?: string;
-        status?: string;
-        activeForm?: string;
+        content?: string
+        subject?: string
+        status?: string
+        activeForm?: string
       }>
-    | undefined;
+    | undefined
 
   const getStatusIcon = (status?: string) => {
     switch (status) {
-      case 'completed':
-        return <CheckCircle2 className="h-3.5 w-3.5 text-status-success" />;
-      case 'in_progress':
-        return <CircleDot className="h-3.5 w-3.5 text-status-info animate-pulse" />;
+      case "completed":
+        return <CheckCircle2 className="h-3.5 w-3.5 text-status-success" />
+      case "in_progress":
+        return <CircleDot className="h-3.5 w-3.5 text-status-info animate-pulse" />
       default:
-        return <Circle className="h-3.5 w-3.5 text-status-warning animate-pulse" />;
+        return <Circle className="h-3.5 w-3.5 text-status-warning animate-pulse" />
     }
-  };
+  }
 
   const getStatusBadge = (status?: string) => {
-    const statusText = status || 'pending';
+    const statusText = status || "pending"
     const badgeClass = cn(
-      'text-[10px] px-1.5 py-0.5 rounded shrink-0',
-      status === 'completed' && 'bg-status-success-bg text-status-success border border-status-success/20',
-      status === 'in_progress' && 'bg-status-info-bg text-status-info border border-status-info/20 animate-pulse',
-      (!status || status === 'pending') &&
-        'bg-status-warning-bg text-status-warning-fg border border-status-warning/20 animate-pulse'
-    );
-    return <span className={badgeClass}>{statusText}</span>;
-  };
+      "text-[10px] px-1.5 py-0.5 rounded shrink-0",
+      status === "completed" &&
+        "bg-status-success-bg text-status-success border border-status-success/20",
+      status === "in_progress" &&
+        "bg-status-info-bg text-status-info border border-status-info/20 animate-pulse",
+      (!status || status === "pending") &&
+        "bg-status-warning-bg text-status-warning-fg border border-status-warning/20 animate-pulse",
+    )
+    return <span className={badgeClass}>{statusText}</span>
+  }
 
-  const completedCount = todos?.filter((t) => t.status === 'completed').length || 0;
-  const totalCount = todos?.length || 0;
+  const completedCount = todos?.filter(t => t.status === "completed").length || 0
+  const totalCount = todos?.length || 0
 
   return (
     <NonCollapsibleToolCard
@@ -200,12 +209,12 @@ function TodoWriteDisplay({ message, isRunning, ToolIcon, colorStyles }: TodoWri
       color={colorStyles.iconText?.color}
       isRunning={isRunning}
       timestamp={message.timestamp}
-      ariaLabel={`Todo list with ${totalCount} tasks, ${completedCount} completed${isRunning ? ', currently updating' : ''}`}
+      ariaLabel={`Todo list with ${totalCount} tasks, ${completedCount} completed${isRunning ? ", currently updating" : ""}`}
       headerContent={
         <>
           {todos && todos.length > 0 && (
             <span className="text-[10px] text-muted-foreground" aria-hidden="true">
-              {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
+              {todos.length} {todos.length === 1 ? "task" : "tasks"}
             </span>
           )}
           {isRunning && (
@@ -216,15 +225,15 @@ function TodoWriteDisplay({ message, isRunning, ToolIcon, colorStyles }: TodoWri
         </>
       }
     >
-      <ul className="p-2 space-y-1 list-none" role="list" aria-label="Task list">
+      <ul className="p-2 space-y-1 list-none" aria-label="Task list">
         {!todos || todos.length === 0 ? (
           <li className="text-[11px] text-muted-foreground italic px-2 py-1">No todos defined</li>
         ) : (
           todos.map((todo, idx) => {
-            const isCompleted = todo.status === 'completed';
-            const isInProgress = todo.status === 'in_progress';
-            const taskName = todo.subject || todo.content || todo.activeForm || 'Unnamed task';
-            const statusText = isCompleted ? 'completed' : isInProgress ? 'in progress' : 'pending';
+            const isCompleted = todo.status === "completed"
+            const isInProgress = todo.status === "in_progress"
+            const taskName = todo.subject || todo.content || todo.activeForm || "Unnamed task"
+            const statusText = isCompleted ? "completed" : isInProgress ? "in progress" : "pending"
             return (
               <li
                 key={idx}
@@ -236,25 +245,25 @@ function TodoWriteDisplay({ message, isRunning, ToolIcon, colorStyles }: TodoWri
                 </div>
                 <div
                   className={cn(
-                    'flex-1 min-w-0 truncate font-medium',
-                    isCompleted && 'line-through text-muted-foreground'
+                    "flex-1 min-w-0 truncate font-medium",
+                    isCompleted && "line-through text-muted-foreground",
                   )}
                 >
                   {taskName}
                 </div>
                 <span aria-hidden="true">{getStatusBadge(todo.status)}</span>
               </li>
-            );
+            )
           })
         )}
       </ul>
     </NonCollapsibleToolCard>
-  );
+  )
 }
 
 interface PlanModeDisplayProps {
-  message: ChatMessage;
-  isRunning: boolean;
+  message: ChatMessage
+  isRunning: boolean
 }
 
 /**
@@ -268,15 +277,15 @@ function EnterPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
       color="hsl(var(--tool-plan))"
       isRunning={isRunning}
       timestamp={message.timestamp}
-      ariaLabel={`Entering plan mode${isRunning ? ', analyzing task' : ''}`}
+      ariaLabel={`Entering plan mode${isRunning ? ", analyzing task" : ""}`}
       headerContent={
         <>
           <span
             className="text-[10px] px-1.5 py-0.5 rounded border"
             style={{
-              backgroundColor: 'hsl(var(--tool-plan) / 0.1)',
-              color: 'hsl(var(--tool-plan))',
-              borderColor: 'hsl(var(--tool-plan) / 0.2)',
+              backgroundColor: "hsl(var(--tool-plan) / 0.1)",
+              color: "hsl(var(--tool-plan))",
+              borderColor: "hsl(var(--tool-plan) / 0.2)",
             }}
             aria-hidden="true"
           >
@@ -296,24 +305,22 @@ function EnterPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
         </p>
       </div>
     </NonCollapsibleToolCard>
-  );
+  )
 }
 
 /**
  * Display for ExitPlanMode - shows the plan ready for approval
  */
 function ExitPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
-  const input = message.toolInput || {};
-  const launchSwarm = input.launchSwarm as boolean | undefined;
-  const teammateCount = input.teammateCount as number | undefined;
-  const allowedPrompts = input.allowedPrompts as
-    | Array<{ tool: string; prompt: string }>
-    | undefined;
-  const pushToRemote = input.pushToRemote as boolean | undefined;
-  const remoteSessionTitle = input.remoteSessionTitle as string | undefined;
+  const input = message.toolInput || {}
+  const launchSwarm = input.launchSwarm as boolean | undefined
+  const teammateCount = input.teammateCount as number | undefined
+  const allowedPrompts = input.allowedPrompts as Array<{ tool: string; prompt: string }> | undefined
+  const pushToRemote = input.pushToRemote as boolean | undefined
+  const remoteSessionTitle = input.remoteSessionTitle as string | undefined
 
-  const permissionCount = allowedPrompts?.length || 0;
-  const hasDetails = launchSwarm || permissionCount > 0 || pushToRemote;
+  const permissionCount = allowedPrompts?.length || 0
+  const hasDetails = launchSwarm || permissionCount > 0 || pushToRemote
 
   return (
     <NonCollapsibleToolCard
@@ -322,15 +329,15 @@ function ExitPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
       color="hsl(var(--tool-plan))"
       isRunning={isRunning}
       timestamp={message.timestamp}
-      ariaLabel={`Plan mode completed${launchSwarm ? `, using ${teammateCount || 'auto'} agents` : ''}${permissionCount > 0 ? `, ${permissionCount} permissions requested` : ''}`}
+      ariaLabel={`Plan mode completed${launchSwarm ? `, using ${teammateCount || "auto"} agents` : ""}${permissionCount > 0 ? `, ${permissionCount} permissions requested` : ""}`}
       headerContent={
         <>
           <span
             className="text-[10px] px-1.5 py-0.5 rounded border"
             style={{
-              backgroundColor: 'hsl(var(--progress-high) / 0.1)',
-              color: 'hsl(var(--progress-high))',
-              borderColor: 'hsl(var(--progress-high) / 0.2)',
+              backgroundColor: "hsl(var(--progress-high) / 0.1)",
+              color: "hsl(var(--progress-high))",
+              borderColor: "hsl(var(--progress-high) / 0.2)",
             }}
             aria-hidden="true"
           >
@@ -346,24 +353,25 @@ function ExitPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
     >
       <div className="p-3 space-y-2">
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Planning phase has concluded. {hasDetails ? 'Implementation details:' : 'Ready to proceed with implementation.'}
+          Planning phase has concluded.{" "}
+          {hasDetails ? "Implementation details:" : "Ready to proceed with implementation."}
         </p>
         {/* Execution details */}
         {hasDetails && (
           <div className="flex flex-wrap gap-2">
             {launchSwarm && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-status-info-bg text-status-info border border-status-info/20">
-                Swarm: {teammateCount || 'auto'} agents
+                Swarm: {teammateCount || "auto"} agents
               </span>
             )}
             {pushToRemote && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500 border border-purple-500/20">
-                Remote: {remoteSessionTitle || 'Claude.ai'}
+                Remote: {remoteSessionTitle || "Claude.ai"}
               </span>
             )}
             {allowedPrompts && allowedPrompts.length > 0 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-status-warning-bg text-status-warning-fg border border-status-warning/20">
-                {allowedPrompts.length} permission{allowedPrompts.length > 1 ? 's' : ''} requested
+                {allowedPrompts.length} permission{allowedPrompts.length > 1 ? "s" : ""} requested
               </span>
             )}
           </div>
@@ -392,85 +400,81 @@ function ExitPlanModeDisplay({ message, isRunning }: PlanModeDisplayProps) {
         )}
       </div>
     </NonCollapsibleToolCard>
-  );
+  )
 }
 
 interface AskUserQuestionDisplayProps {
-  message: ChatMessage;
-  isRunning: boolean;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
-  answer?: string;
+  message: ChatMessage
+  isRunning: boolean
+  colorStyles: ReturnType<typeof getToolColorStyles>
+  answer?: string
 }
 
 /**
  * Display for AskUserQuestion - collapsible with tabbed questions and answer
  */
-function AskUserQuestionDisplay({
-  message,
-  isRunning,
-  answer,
-}: AskUserQuestionDisplayProps) {
-  const [activeTab, setActiveTab] = useState(0);
+function AskUserQuestionDisplay({ message, isRunning, answer }: AskUserQuestionDisplayProps) {
+  const [activeTab, setActiveTab] = useState(0)
 
   // Safely extract and validate questions array
-  const rawQuestions = message.toolInput?.questions;
+  const rawQuestions = message.toolInput?.questions
   const questions = Array.isArray(rawQuestions)
     ? (rawQuestions as Array<{
-        question: string;
-        header?: string;
-        options?: Array<{ label: string; description?: string }>;
-        multiSelect?: boolean;
+        question: string
+        header?: string
+        options?: Array<{ label: string; description?: string }>
+        multiSelect?: boolean
       }>)
-    : undefined;
+    : undefined
 
   // Parse the answer to extract user selections
-  const parsedAnswers = answer ? parseAnswerContent(answer) : null;
+  const parsedAnswers = answer ? parseAnswerContent(answer) : null
 
-  const questionCount = questions?.length ?? 0;
-  const hasAnswer = !!parsedAnswers && Object.keys(parsedAnswers).length > 0;
+  const questionCount = questions?.length ?? 0
+  const hasAnswer = !!parsedAnswers && Object.keys(parsedAnswers).length > 0
 
   // Default: expanded when waiting for answer, collapsed when answered
-  const [expanded, setExpanded] = useState(!hasAnswer);
+  const [expanded, setExpanded] = useState(!hasAnswer)
 
   // Sync expanded state when answer arrives
   useEffect(() => {
     if (hasAnswer) {
-      setExpanded(false);
+      setExpanded(false)
     }
-  }, [hasAnswer]);
+  }, [hasAnswer])
 
   // Get summary for collapsed state
   const getSummary = () => {
     if (hasAnswer && questions && questions.length > 0) {
-      const firstQuestion = questions[0];
-      const firstAnswer = parsedAnswers?.[firstQuestion.question];
+      const firstQuestion = questions[0]
+      const firstAnswer = parsedAnswers?.[firstQuestion.question]
       if (firstAnswer) {
-        const answerText = Array.isArray(firstAnswer) ? firstAnswer.join(', ') : firstAnswer;
-        return answerText.length > 50 ? answerText.slice(0, 50) + '...' : answerText;
+        const answerText = Array.isArray(firstAnswer) ? firstAnswer.join(", ") : firstAnswer
+        return answerText.length > 50 ? `${answerText.slice(0, 50)}...` : answerText
       }
     }
     if (questions && questions.length > 0) {
-      const q = questions[0].question;
-      return q.length > 40 ? q.slice(0, 40) + '...' : q;
+      const q = questions[0].question
+      return q.length > 40 ? `${q.slice(0, 40)}...` : q
     }
-    return null;
-  };
+    return null
+  }
 
-  const statusText = hasAnswer ? 'answered' : 'waiting for response';
-  const detailsId = `question-details-${message.toolUseId || message.timestamp}`;
+  const statusText = hasAnswer ? "answered" : "waiting for response"
+  const detailsId = `question-details-${message.toolUseId || message.timestamp}`
 
   return (
     <div
       className="group flex gap-2 sm:gap-3 py-1.5 px-2 sm:px-4"
       role="article"
-      aria-label={`User question with ${questionCount} ${questionCount === 1 ? 'question' : 'questions'}, status: ${statusText}`}
+      aria-label={`User question with ${questionCount} ${questionCount === 1 ? "question" : "questions"}, status: ${statusText}`}
     >
       <div
         className={cn(
-          'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border',
-          isRunning && 'animate-pulse'
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border",
+          isRunning && "animate-pulse",
         )}
-        style={{ color: 'hsl(var(--tool-question))' }}
+        style={{ color: "hsl(var(--tool-question))" }}
         aria-hidden="true"
       >
         {isRunning ? (
@@ -484,7 +488,7 @@ function AskUserQuestionDisplay({
       <div className="min-w-0 flex-1" aria-live="polite">
         <Card
           className="overflow-hidden rounded-lg shadow-sm w-full md:max-w-2xl bg-muted/30 border-l-2"
-          style={{ borderLeftColor: 'hsl(var(--tool-question))' }}
+          style={{ borderLeftColor: "hsl(var(--tool-question))" }}
         >
           {/* Header - clickable to expand/collapse */}
           <Button
@@ -506,15 +510,15 @@ function AskUserQuestionDisplay({
                 className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded border"
                 style={{
                   backgroundColor: hasAnswer
-                    ? 'hsl(var(--progress-high) / 0.1)'
-                    : 'hsl(var(--tool-question) / 0.1)',
-                  color: hasAnswer ? 'hsl(var(--progress-high))' : 'hsl(var(--tool-question))',
+                    ? "hsl(var(--progress-high) / 0.1)"
+                    : "hsl(var(--tool-question) / 0.1)",
+                  color: hasAnswer ? "hsl(var(--progress-high))" : "hsl(var(--tool-question))",
                   borderColor: hasAnswer
-                    ? 'hsl(var(--progress-high) / 0.2)'
-                    : 'hsl(var(--tool-question) / 0.2)',
+                    ? "hsl(var(--progress-high) / 0.2)"
+                    : "hsl(var(--tool-question) / 0.2)",
                 }}
               >
-                {hasAnswer ? 'Answered' : 'Waiting'}
+                {hasAnswer ? "Answered" : "Waiting"}
               </span>
               {!expanded && getSummary() && (
                 <>
@@ -532,7 +536,10 @@ function AskUserQuestionDisplay({
                     <span className="sr-only">Answered</span>
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-status-warning" aria-label="Waiting for user response">
+                  <span
+                    className="flex items-center gap-1 text-status-warning"
+                    aria-label="Waiting for user response"
+                  >
                     <Clock className="h-4 w-4" aria-hidden="true" />
                     <span className="text-xs sm:text-[10px] font-medium">Waiting</span>
                   </span>
@@ -545,25 +552,32 @@ function AskUserQuestionDisplay({
           <div
             className={cn(
               "grid transition-all duration-200 ease-out",
-              expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
             )}
             id={detailsId}
           >
             <div className="overflow-hidden">
               {/* Question tabs */}
               {questionCount > 0 && (
-                <div className="border-b-[3px] border-border bg-muted/20" role="tablist" aria-label="Questions">
+                <div
+                  className="border-b-[3px] border-border bg-muted/20"
+                  role="tablist"
+                  aria-label="Questions"
+                >
                   <div className="px-3 pt-2">
                     <div className="flex items-end gap-3">
-                      <span className="text-xs sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider shrink-0 pb-1.5" aria-hidden="true">
+                      <span
+                        className="text-xs sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider shrink-0 pb-1.5"
+                        aria-hidden="true"
+                      >
                         Questions
                       </span>
                       {questionCount > 1 ? (
                         <div className="flex gap-1">
                           {questions?.map((q, idx) => {
-                            const isActive = activeTab === idx;
-                            const questionAnswer = parsedAnswers?.[q.question];
-                            const isAnswered = !!questionAnswer;
+                            const isActive = activeTab === idx
+                            const questionAnswer = parsedAnswers?.[q.question]
+                            const isAnswered = !!questionAnswer
                             return (
                               <button
                                 key={idx}
@@ -573,17 +587,23 @@ function AskUserQuestionDisplay({
                                 aria-controls={`question-panel-${idx}`}
                                 id={`question-tab-${idx}`}
                                 className={cn(
-                                  'flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors whitespace-nowrap rounded-t-md -mb-[3px] min-h-[36px] sm:min-h-0',
+                                  "flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors whitespace-nowrap rounded-t-md -mb-[3px] min-h-[36px] sm:min-h-0",
                                   isActive
-                                    ? 'bg-background border-[3px] border-b-0 border-primary text-foreground'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                    ? "bg-background border-[3px] border-b-0 border-primary text-foreground"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                                 )}
-                                aria-label={`Question ${idx + 1}: ${q.header || q.question.slice(0, 30)}${isAnswered ? ', answered' : ''}`}
+                                aria-label={`Question ${idx + 1}: ${q.header || q.question.slice(0, 30)}${isAnswered ? ", answered" : ""}`}
                               >
                                 {isAnswered ? (
-                                  <Check className="h-3.5 w-3.5 text-status-success" aria-hidden="true" />
+                                  <Check
+                                    className="h-3.5 w-3.5 text-status-success"
+                                    aria-hidden="true"
+                                  />
                                 ) : (
-                                  <span className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold" aria-hidden="true">
+                                  <span
+                                    className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold"
+                                    aria-hidden="true"
+                                  >
                                     {idx + 1}
                                   </span>
                                 )}
@@ -591,11 +611,13 @@ function AskUserQuestionDisplay({
                                   {q.header || `Q${idx + 1}`}
                                 </span>
                               </button>
-                            );
+                            )
                           })}
                         </div>
                       ) : (
-                        <span className="text-xs sm:text-[10px] text-muted-foreground pb-1.5">1 of 1</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground pb-1.5">
+                          1 of 1
+                        </span>
                       )}
                     </div>
                   </div>
@@ -624,25 +646,27 @@ function AskUserQuestionDisplay({
           </div>
         </Card>
         <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-xs sm:text-[11px] text-muted-foreground">{formatTime(message.timestamp)}</span>
+          <span className="text-xs sm:text-[11px] text-muted-foreground">
+            {formatTime(message.timestamp)}
+          </span>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 interface QuestionContentProps {
   question: {
-    question: string;
-    header?: string;
-    options?: Array<{ label: string; description?: string }>;
-    multiSelect?: boolean;
-  };
-  answer?: string | string[];
+    question: string
+    header?: string
+    options?: Array<{ label: string; description?: string }>
+    multiSelect?: boolean
+  }
+  answer?: string | string[]
 }
 
 function QuestionContent({ question, answer }: QuestionContentProps) {
-  const answers = Array.isArray(answer) ? answer : answer ? [answer] : [];
+  const answers = Array.isArray(answer) ? answer : answer ? [answer] : []
 
   return (
     <div className="space-y-2">
@@ -660,15 +684,15 @@ function QuestionContent({ question, answer }: QuestionContentProps) {
         <div className="space-y-0.5 pl-1">
           {question.options.map((opt, oIdx) => {
             const isSelected =
-              answers.includes(opt.label) || answers.some((a) => a.includes(opt.label));
+              answers.includes(opt.label) || answers.some(a => a.includes(opt.label))
             return (
               <div
                 key={oIdx}
                 className={cn(
-                  'flex items-center gap-2 text-[11px] px-2 py-1 rounded transition-colors',
+                  "flex items-center gap-2 text-[11px] px-2 py-1 rounded transition-colors",
                   isSelected
-                    ? 'bg-status-success-bg text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? "bg-status-success-bg text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {isSelected ? (
@@ -678,14 +702,14 @@ function QuestionContent({ question, answer }: QuestionContentProps) {
                     {String.fromCharCode(65 + oIdx)}
                   </span>
                 )}
-                <span className={cn('truncate', isSelected && 'font-medium')}>{opt.label}</span>
+                <span className={cn("truncate", isSelected && "font-medium")}>{opt.label}</span>
                 {opt.description && (
                   <span className="text-[10px] text-muted-foreground/70 truncate hidden sm:inline">
                     - {opt.description}
                   </span>
                 )}
               </div>
-            );
+            )
           })}
         </div>
       )}
@@ -711,7 +735,7 @@ function QuestionContent({ question, answer }: QuestionContentProps) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 /**
@@ -719,21 +743,21 @@ function QuestionContent({ question, answer }: QuestionContentProps) {
  */
 function parseAnswerContent(content: string): Record<string, string | string[]> | null {
   try {
-    const parsed = JSON.parse(content);
-    if (typeof parsed === 'object' && parsed !== null) {
-      return parsed;
+    const parsed = JSON.parse(content)
+    if (typeof parsed === "object" && parsed !== null) {
+      return parsed
     }
   } catch {
-    const result: Record<string, string | string[]> = {};
-    const selectMatch = content.match(/(?:selected|answer|chose|picked):\s*(.+)/i);
+    const result: Record<string, string | string[]> = {}
+    const selectMatch = content.match(/(?:selected|answer|chose|picked):\s*(.+)/i)
     if (selectMatch) {
-      result['_answer'] = selectMatch[1].trim();
-      return result;
+      result["_answer"] = selectMatch[1].trim()
+      return result
     }
     if (content.trim()) {
-      result['_answer'] = content.trim();
-      return result;
+      result["_answer"] = content.trim()
+      return result
     }
   }
-  return null;
+  return null
 }

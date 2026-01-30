@@ -1,32 +1,50 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
 const config: Config = {
-  content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-  ],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   darkMode: "class",
   safelist: [
     // Status colors - ensure all variants are generated
-    'bg-status-success', 'bg-status-success-fg', 'bg-status-success-bg',
-    'text-status-success', 'text-status-success-fg', 'text-status-success-bg',
-    'border-status-success',
-    'bg-status-warning', 'bg-status-warning-fg', 'bg-status-warning-bg',
-    'text-status-warning', 'text-status-warning-fg', 'text-status-warning-bg',
-    'border-status-warning',
-    'bg-status-error', 'bg-status-error-fg', 'bg-status-error-bg',
-    'text-status-error', 'text-status-error-fg', 'text-status-error-bg',
-    'border-status-error',
-    'bg-status-info', 'bg-status-info-fg', 'bg-status-info-bg',
-    'text-status-info', 'text-status-info-fg', 'text-status-info-bg',
-    'border-status-info',
+    "bg-status-success",
+    "bg-status-success-fg",
+    "bg-status-success-bg",
+    "text-status-success",
+    "text-status-success-fg",
+    "text-status-success-bg",
+    "border-status-success",
+    "bg-status-warning",
+    "bg-status-warning-fg",
+    "bg-status-warning-bg",
+    "text-status-warning",
+    "text-status-warning-fg",
+    "text-status-warning-bg",
+    "border-status-warning",
+    "bg-status-error",
+    "bg-status-error-fg",
+    "bg-status-error-bg",
+    "text-status-error",
+    "text-status-error-fg",
+    "text-status-error-bg",
+    "border-status-error",
+    "bg-status-info",
+    "bg-status-info-fg",
+    "bg-status-info-bg",
+    "text-status-info",
+    "text-status-info-fg",
+    "text-status-info-bg",
+    "border-status-info",
     // Codeblock colors
-    'bg-codeblock-bg', 'bg-codeblock-header', 'bg-codeblock-border',
-    'text-codeblock-text', 'text-codeblock-muted',
-    'border-codeblock-border',
+    "bg-codeblock-bg",
+    "bg-codeblock-header",
+    "bg-codeblock-border",
+    "text-codeblock-text",
+    "text-codeblock-muted",
+    "border-codeblock-border",
     // Diff colors
-    'bg-diff-added-bg', 'bg-diff-removed-bg',
-    'text-diff-added-fg', 'text-diff-removed-fg',
+    "bg-diff-added-bg",
+    "bg-diff-removed-bg",
+    "text-diff-added-fg",
+    "text-diff-removed-fg",
   ],
   theme: {
     extend: {
@@ -104,6 +122,16 @@ const config: Config = {
             fg: "hsl(var(--diff-removed-fg))",
           },
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -113,6 +141,6 @@ const config: Config = {
     },
   },
   plugins: [],
-};
+}
 
-export default config;
+export default config

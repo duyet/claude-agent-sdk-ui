@@ -5,7 +5,7 @@
  * Uses JWT_SECRET (must match backend).
  */
 
-import { jwtVerify } from "jose"
+import { type JWTPayload, jwtVerify } from "jose"
 import { type NextRequest, NextResponse } from "next/server"
 import {
   createToken,
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const secret = new TextEncoder().encode(jwtSecret)
 
     // Verify refresh token
-    let payload
+    let payload: JWTPayload | undefined
     try {
       const result = await jwtVerify(refreshToken, secret, {
         issuer: JWT_CONFIG.issuer,

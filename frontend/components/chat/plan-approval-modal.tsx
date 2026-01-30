@@ -1,23 +1,23 @@
-'use client';
+"use client"
 
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { Check, ClipboardList, Keyboard, MessageSquare, ThumbsDown, ThumbsUp } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { usePlanStore } from '@/lib/store/plan-store';
-import { cn } from '@/lib/utils';
-import { Check, Circle, ClipboardList, ThumbsUp, ThumbsDown, MessageSquare, Keyboard } from 'lucide-react';
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { usePlanStore } from "@/lib/store/plan-store"
+import { cn } from "@/lib/utils"
 
 interface PlanApprovalModalProps {
-  onSubmit: (planId: string, approved: boolean, feedback?: string) => void;
+  onSubmit: (planId: string, approved: boolean, feedback?: string) => void
 }
 
 export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
@@ -33,110 +33,110 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
     setFeedback,
     tick,
     closeModal,
-  } = usePlanStore();
+  } = usePlanStore()
 
-  const [showFeedback, setShowFeedback] = useState(false);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const [showFeedback, setShowFeedback] = useState(false)
+  const _dialogRef = useRef<HTMLDivElement>(null)
 
   // Reset feedback visibility when modal opens
   useEffect(() => {
     if (isOpen) {
-      setShowFeedback(false);
+      setShowFeedback(false)
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Handle approve action
   const handleApprove = useCallback(() => {
     if (planId) {
-      onSubmit(planId, true, feedback || undefined);
-      closeModal();
+      onSubmit(planId, true, feedback || undefined)
+      closeModal()
     }
-  }, [planId, feedback, onSubmit, closeModal]);
+  }, [planId, feedback, onSubmit, closeModal])
 
   // Handle reject action
   const handleReject = useCallback(() => {
     if (planId) {
-      onSubmit(planId, false, feedback || undefined);
-      closeModal();
+      onSubmit(planId, false, feedback || undefined)
+      closeModal()
     }
-  }, [planId, feedback, onSubmit, closeModal]);
+  }, [planId, feedback, onSubmit, closeModal])
 
   // Keyboard shortcuts for approve/reject
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in the feedback textarea
       if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) {
-        return;
+        return
       }
 
-      const key = e.key.toLowerCase();
+      const key = e.key.toLowerCase()
 
       // 'Y' or 'A' to approve
-      if (key === 'y' || key === 'a') {
-        e.preventDefault();
-        handleApprove();
+      if (key === "y" || key === "a") {
+        e.preventDefault()
+        handleApprove()
       }
 
       // 'N' or 'R' to reject
-      if (key === 'n' || key === 'r') {
-        e.preventDefault();
-        handleReject();
+      if (key === "n" || key === "r") {
+        e.preventDefault()
+        handleReject()
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleApprove, handleReject]);
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isOpen, handleApprove, handleReject])
 
   // Countdown timer
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const interval = setInterval(() => {
-      tick();
-    }, 1000);
+      tick()
+    }, 1000)
 
-    return () => clearInterval(interval);
-  }, [isOpen, tick]);
+    return () => clearInterval(interval)
+  }, [isOpen, tick])
 
   // Auto-approve on timeout (default behavior)
   useEffect(() => {
     if (remainingSeconds === 0 && isOpen && planId) {
-      onSubmit(planId, true);
-      closeModal();
+      onSubmit(planId, true)
+      closeModal()
     }
-  }, [remainingSeconds, isOpen, planId, onSubmit, closeModal]);
+  }, [remainingSeconds, isOpen, planId, onSubmit, closeModal])
 
-  const progressPercent = timeoutSeconds > 0 ? (remainingSeconds / timeoutSeconds) * 100 : 0;
+  const progressPercent = timeoutSeconds > 0 ? (remainingSeconds / timeoutSeconds) * 100 : 0
 
   function getProgressColorVar(): string {
-    if (progressPercent > 50) return '--progress-high';
-    if (progressPercent > 25) return '--progress-medium';
-    return '--progress-low';
+    if (progressPercent > 50) return "--progress-high"
+    if (progressPercent > 25) return "--progress-medium"
+    return "--progress-low"
   }
 
   // Count completed steps
-  const completedCount = steps.filter(s => s.status === 'completed').length;
+  const completedCount = steps.filter(s => s.status === "completed").length
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && closeModal()}>
       <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="space-y-2">
           <div className="flex items-center gap-3">
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
               style={{
-                backgroundColor: 'hsl(var(--tool-plan) / 0.1)',
-                color: 'hsl(var(--tool-plan))',
+                backgroundColor: "hsl(var(--tool-plan) / 0.1)",
+                color: "hsl(var(--tool-plan))",
               }}
             >
               <ClipboardList className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-base sm:text-lg truncate">
-                {title || 'Plan Ready for Review'}
+                {title || "Plan Ready for Review"}
               </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
                 Review and approve the proposed plan
@@ -182,8 +182,8 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
             </div>
           ) : (
             steps.map((step, idx) => {
-              const isCompleted = step.status === 'completed';
-              const isInProgress = step.status === 'in_progress';
+              const isCompleted = step.status === "completed"
+              const isInProgress = step.status === "in_progress"
               return (
                 <div
                   key={idx}
@@ -191,7 +191,7 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
                     "flex items-start gap-3 p-3 rounded-lg border transition-colors",
                     isCompleted && "bg-status-success-bg border-status-success/20",
                     isInProgress && "bg-status-info-bg border-status-info/20",
-                    !isCompleted && !isInProgress && "bg-muted/30 border-border/50"
+                    !isCompleted && !isInProgress && "bg-muted/30 border-border/50",
                   )}
                 >
                   <div className="shrink-0 mt-0.5">
@@ -205,30 +205,40 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
                       </div>
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center">
-                        <span className="text-[10px] font-medium text-muted-foreground">{idx + 1}</span>
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                          {idx + 1}
+                        </span>
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={cn(
-                      "text-sm leading-relaxed",
-                      isCompleted && "text-muted-foreground line-through"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-sm leading-relaxed",
+                        isCompleted && "text-muted-foreground line-through",
+                      )}
+                    >
                       {step.description}
                     </p>
                   </div>
                   {step.status && (
-                    <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded shrink-0",
-                      isCompleted && "bg-status-success-bg text-status-success border border-status-success/20",
-                      isInProgress && "bg-status-info-bg text-status-info border border-status-info/20",
-                      !isCompleted && !isInProgress && "bg-status-warning-bg text-status-warning-fg border border-status-warning/20"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-[10px] px-1.5 py-0.5 rounded shrink-0",
+                        isCompleted &&
+                          "bg-status-success-bg text-status-success border border-status-success/20",
+                        isInProgress &&
+                          "bg-status-info-bg text-status-info border border-status-info/20",
+                        !isCompleted &&
+                          !isInProgress &&
+                          "bg-status-warning-bg text-status-warning-fg border border-status-warning/20",
+                      )}
+                    >
                       {step.status}
                     </span>
                   )}
                 </div>
-              );
+              )
             })
           )}
         </div>
@@ -243,7 +253,7 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
               id="feedback"
               placeholder="Provide feedback or suggestions for the plan..."
               value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
+              onChange={e => setFeedback(e.target.value)}
               className="min-h-[80px] resize-none"
             />
           </div>
@@ -258,7 +268,7 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
               className="flex items-center gap-1.5 h-9"
             >
               <MessageSquare className="h-3.5 w-3.5" />
-              {showFeedback ? 'Hide' : 'Add'} Feedback
+              {showFeedback ? "Hide" : "Add"} Feedback
             </Button>
             {/* Keyboard shortcut hints - hidden on mobile */}
             <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -278,7 +288,9 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
             >
               <ThumbsDown className="h-4 w-4 mr-1.5" />
               <span>Reject</span>
-              <kbd className="hidden sm:inline-flex ml-2 px-1.5 py-0.5 rounded bg-destructive/10 border border-destructive/20 text-[9px] font-mono opacity-60 group-hover:opacity-100 transition-opacity">N</kbd>
+              <kbd className="hidden sm:inline-flex ml-2 px-1.5 py-0.5 rounded bg-destructive/10 border border-destructive/20 text-[9px] font-mono opacity-60 group-hover:opacity-100 transition-opacity">
+                N
+              </kbd>
             </Button>
             <Button
               onClick={handleApprove}
@@ -286,13 +298,15 @@ export function PlanApprovalModal({ onSubmit }: PlanApprovalModalProps) {
             >
               <ThumbsUp className="h-4 w-4 mr-1.5" />
               <span>Approve</span>
-              <kbd className="hidden sm:inline-flex ml-2 px-1.5 py-0.5 rounded bg-background/20 border border-background/30 text-[9px] font-mono opacity-60 group-hover:opacity-100 transition-opacity">Y</kbd>
+              <kbd className="hidden sm:inline-flex ml-2 px-1.5 py-0.5 rounded bg-background/20 border border-background/30 text-[9px] font-mono opacity-60 group-hover:opacity-100 transition-opacity">
+                Y
+              </kbd>
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export default PlanApprovalModal;
+export default PlanApprovalModal

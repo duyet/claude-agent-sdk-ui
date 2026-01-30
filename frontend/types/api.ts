@@ -1,83 +1,83 @@
 // types/api.ts
 export interface AgentInfo {
-  agent_id: string;
-  name: string;
-  description: string;
-  model: string;
-  is_default: boolean;
+  agent_id: string
+  name: string
+  description: string
+  model: string
+  is_default: boolean
 }
 
 export interface SessionInfo {
-  session_id: string;
-  name: string | null;
-  first_message: string | null;
-  created_at: string;
-  turn_count: number;
-  user_id: string | null;
-  agent_id: string | null;
+  session_id: string
+  name: string | null
+  first_message: string | null
+  created_at: string
+  turn_count: number
+  user_id: string | null
+  agent_id: string | null
 }
 
 export interface SessionResponse {
-  session_id: string;
-  status: string;
-  resumed: boolean;
+  session_id: string
+  status: string
+  resumed: boolean
 }
 
 export interface SessionHistoryResponse {
-  session_id: string;
-  messages: HistoryMessage[];
-  turn_count: number;
-  first_message: string | null;
+  session_id: string
+  messages: HistoryMessage[]
+  turn_count: number
+  first_message: string | null
 }
 
 export interface HistoryMessage {
-  role: string;
-  content: string;
-  timestamp?: string;
+  role: string
+  content: string
+  timestamp?: string
 }
 
 export interface ErrorResponse {
-  error: string;
-  detail?: string;
+  error: string
+  detail?: string
 }
 
 export interface CreateSessionRequest {
-  agent_id?: string;
+  agent_id?: string
 }
 
 export interface ResumeSessionRequest {
-  initial_message?: string;
+  initial_message?: string
 }
 
 export interface CloseSessionResponse {
-  status: string;
+  status: string
 }
 
 export interface DeleteSessionResponse {
-  status: string;
+  status: string
 }
 
 export interface AgentsListResponse {
-  agents: AgentInfo[];
+  agents: AgentInfo[]
 }
 
 // Auth types
 export interface TokenPair {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  expires_in: number;
-  user_id: string;
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+  user_id: string
 }
 
 export interface RefreshTokenRequest {
-  refresh_token: string;
+  refresh_token: string
 }
 
 export interface UpdateSessionRequest {
-  name?: string | null;
+  name?: string | null
 }
 
 export interface BatchDeleteSessionsRequest {
-  session_ids: string[];
+  session_ids: string[]
 }

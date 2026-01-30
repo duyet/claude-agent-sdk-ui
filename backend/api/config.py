@@ -1,6 +1,4 @@
 """API configuration settings."""
-import hashlib
-import hmac
 import logging
 import os
 from pathlib import Path
@@ -30,20 +28,8 @@ if "*" in API_CONFIG["cors_origins"]:
     logger.warning("WARNING: CORS configured with wildcard origin (*). Set CORS_ORIGINS for production.")
 
 # JWT configuration
-# Derive JWT secret from API_KEY using HMAC (secure key derivation)
-def _get_jwt_secret() -> str | None:
-    """Derive JWT secret from API_KEY using HMAC-SHA256."""
-    if not API_KEY:
-        return None
-
-    # Derive JWT secret using HMAC-SHA256 with a fixed salt
-    # This ensures API_KEY cannot be recovered from JWT secret
-    salt = _settings.jwt.salt.encode()
-    derived = hmac.new(salt, API_KEY.encode(), hashlib.sha256).hexdigest()
-    return derived
-
 JWT_CONFIG = {
-    "secret_key": _get_jwt_secret(),
+    "secret_key": _settings.jwt.secret,
     "algorithm": _settings.jwt.algorithm,
     "access_token_expire_minutes": int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")),
     "refresh_token_expire_days": int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")),
@@ -52,10 +38,7 @@ JWT_CONFIG = {
 }
 
 # Log JWT status
-if JWT_CONFIG["secret_key"]:
-    logger.info("JWT authentication enabled (using API_KEY as secret)")
-else:
-    logger.warning("API_KEY not configured. JWT authentication disabled.")
+logger.info("JWT authentication enabled (using JWT_SECRET)")
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent.parent

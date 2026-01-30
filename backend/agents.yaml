@@ -20,12 +20,13 @@ _defaults:
   include_partial_messages: true
   setting_sources:
     - project
-  cwd: tests/voice-agents
   disallowed_tools: []
   mcp_servers: {}
   allowed_directories:
     - /tmp
-  with_permissions: true  # Enable permission hooks to restrict file operations
+    - /Users/duet
+    - /Users/duet/project
+  with_permissions: false  # Disable permission hooks for local development
 
 default_agent: general-assistant-g1h2i3j4
 

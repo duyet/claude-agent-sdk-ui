@@ -8,15 +8,21 @@ Usage:
     from core.settings import get_settings
 
     settings = get_settings()
-    print(settings.jwt.salt)
+    print(settings.jwt.secret)
     print(settings.api.port)
     print(settings.storage.max_sessions)
 """
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
 
 
 class JWTSettings(BaseSettings):
@@ -24,9 +30,9 @@ class JWTSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="JWT_")
 
-    salt: str = Field(
-        default="claude-agent-sdk-jwt-v1",
-        description="Salt used for deriving JWT secret from API key"
+    secret: str = Field(
+        ...,
+        description="JWT secret key for signing tokens (JWT_SECRET env var)"
     )
     issuer: str = Field(
         default="claude-agent-sdk",

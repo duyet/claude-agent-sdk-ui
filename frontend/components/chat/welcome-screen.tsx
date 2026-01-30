@@ -1,5 +1,5 @@
-'use client';
-import { Sparkles } from 'lucide-react';
+"use client"
+import { Sparkles } from "lucide-react"
 
 export function WelcomeScreen() {
   return (
@@ -8,7 +8,8 @@ export function WelcomeScreen() {
       <div
         className="absolute inset-0 opacity-30 dark:opacity-20 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, hsl(var(--primary) / 0.1) 0%, transparent 40%)',
+          background:
+            "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, hsl(var(--primary) / 0.1) 0%, transparent 40%)",
         }}
       />
 
@@ -23,5 +24,5 @@ export function WelcomeScreen() {
         <h2 className="text-2xl font-semibold tracking-tight">Welcome to Claude Agent SDK</h2>
       </div>
     </div>
-  );
+  )
 }

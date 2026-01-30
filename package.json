@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "react-resizable-panels": "^4.4.1"
+  },
+  "devDependencies": {
+    "shadcn": "^3.8.0"
   }
 }

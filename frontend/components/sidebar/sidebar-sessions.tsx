@@ -1,27 +1,27 @@
-'use client';
+"use client"
 
-import { useState, useMemo, useCallback } from 'react';
-import { useSessions, useBatchDeleteSessions } from '@/hooks/use-sessions';
-import { useChatStore } from '@/lib/store/chat-store';
-import { SidebarSessionItem } from './sidebar-session-item';
+import { Check, CheckSquare, ChevronDown, Loader2, Search, Trash2 } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuSkeleton,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, Loader2, Search, CheckSquare, Trash2, Check } from 'lucide-react';
+} from "@/components/ui/sidebar"
+import { useBatchDeleteSessions, useSessions } from "@/hooks/use-sessions"
+import { useChatStore } from "@/lib/store/chat-store"
+import { SidebarSessionItem } from "./sidebar-session-item"
 
-const SESSIONS_PAGE_SIZE = 20;
+const SESSIONS_PAGE_SIZE = 20
 
 interface SidebarSessionsProps {
-  searchQuery: string;
-  searchExpanded: boolean;
-  setSearchExpanded: (expanded: boolean) => void;
-  selectMode: boolean;
-  setSelectMode: (mode: boolean) => void;
+  searchQuery: string
+  searchExpanded: boolean
+  setSearchExpanded: (expanded: boolean) => void
+  selectMode: boolean
+  setSelectMode: (mode: boolean) => void
 }
 
 export function SidebarSessions({
@@ -31,102 +31,99 @@ export function SidebarSessions({
   selectMode,
   setSelectMode,
 }: SidebarSessionsProps) {
-  const { data: sessions, isLoading } = useSessions();
-  const sessionId = useChatStore((s) => s.sessionId);
-  const setSessionId = useChatStore((s) => s.setSessionId);
-  const setAgentId = useChatStore((s) => s.setAgentId);
-  const clearMessages = useChatStore((s) => s.clearMessages);
+  const { data: sessions, isLoading } = useSessions()
+  const sessionId = useChatStore(s => s.sessionId)
+  const setSessionId = useChatStore(s => s.setSessionId)
+  const setAgentId = useChatStore(s => s.setAgentId)
+  const clearMessages = useChatStore(s => s.clearMessages)
 
-  const [displayCount, setDisplayCount] = useState(SESSIONS_PAGE_SIZE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const batchDelete = useBatchDeleteSessions();
+  const [displayCount, setDisplayCount] = useState(SESSIONS_PAGE_SIZE)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const batchDelete = useBatchDeleteSessions()
 
   const { filteredSessions, totalCount, hasMore } = useMemo(() => {
-    if (!sessions) return { filteredSessions: [], totalCount: 0, hasMore: false };
+    if (!sessions) return { filteredSessions: [], totalCount: 0, hasMore: false }
 
-    let filtered = sessions;
+    let filtered = sessions
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((session) => {
-        const name = session.name || '';
-        const firstMessage = session.first_message || '';
-        return (
-          name.toLowerCase().includes(query) ||
-          firstMessage.toLowerCase().includes(query)
-        );
-      });
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(session => {
+        const name = session.name || ""
+        const firstMessage = session.first_message || ""
+        return name.toLowerCase().includes(query) || firstMessage.toLowerCase().includes(query)
+      })
     }
 
-    const displayed = filtered.slice(0, displayCount);
+    const displayed = filtered.slice(0, displayCount)
 
     return {
       filteredSessions: displayed,
       totalCount: filtered.length,
       hasMore: filtered.length > displayCount,
-    };
-  }, [sessions, searchQuery, displayCount]);
+    }
+  }, [sessions, searchQuery, displayCount])
 
   const handleLoadMore = useCallback(() => {
-    setIsLoadingMore(true);
+    setIsLoadingMore(true)
     setTimeout(() => {
-      setDisplayCount((prev) => prev + SESSIONS_PAGE_SIZE);
-      setIsLoadingMore(false);
-    }, 150);
-  }, []);
+      setDisplayCount(prev => prev + SESSIONS_PAGE_SIZE)
+      setIsLoadingMore(false)
+    }, 150)
+  }, [])
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
+    setSelectedIds(prev => {
+      const next = new Set(prev)
       if (next.has(id)) {
-        next.delete(id);
+        next.delete(id)
       } else {
-        next.add(id);
+        next.add(id)
       }
-      return next;
-    });
-  };
+      return next
+    })
+  }
 
   const handleSelectAll = useCallback(() => {
-    if (filteredSessions.length === 0) return;
+    if (filteredSessions.length === 0) return
 
-    const allSelected = filteredSessions.every((session) => selectedIds.has(session.session_id));
+    const allSelected = filteredSessions.every(session => selectedIds.has(session.session_id))
 
     if (allSelected) {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredSessions.forEach((session) => next.delete(session.session_id));
-        return next;
-      });
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filteredSessions.forEach(session => next.delete(session.session_id))
+        return next
+      })
     } else {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredSessions.forEach((session) => next.add(session.session_id));
-        return next;
-      });
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filteredSessions.forEach(session => next.add(session.session_id))
+        return next
+      })
     }
-  }, [filteredSessions, selectedIds]);
+  }, [filteredSessions, selectedIds])
 
   const handleBatchDelete = async () => {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0) return
 
-    if (confirm(`Delete ${selectedIds.size} conversation${selectedIds.size > 1 ? 's' : ''}?`)) {
+    if (confirm(`Delete ${selectedIds.size} conversation${selectedIds.size > 1 ? "s" : ""}?`)) {
       try {
-        await batchDelete.mutateAsync(Array.from(selectedIds));
+        await batchDelete.mutateAsync(Array.from(selectedIds))
 
         if (sessionId && selectedIds.has(sessionId)) {
-          setSessionId(null);
-          setAgentId(null);
-          clearMessages();
+          setSessionId(null)
+          setAgentId(null)
+          clearMessages()
         }
 
-        setSelectMode(false);
+        setSelectMode(false)
       } catch (error) {
-        console.error('Batch delete failed:', error);
+        console.error("Batch delete failed:", error)
       }
     }
-  };
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -141,16 +138,16 @@ export function SidebarSessions({
               onClick={() => setSearchExpanded(!searchExpanded)}
               title="Search conversations"
             >
-              <Search className={`size-3.5 ${searchExpanded ? 'text-primary' : ''}`} />
+              <Search className={`size-3.5 ${searchExpanded ? "text-primary" : ""}`} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="size-6"
               onClick={() => setSelectMode(!selectMode)}
-              title={selectMode ? 'Cancel selection' : 'Select sessions'}
+              title={selectMode ? "Cancel selection" : "Select sessions"}
             >
-              <CheckSquare className={`size-3.5 ${selectMode ? 'text-primary' : ''}`} />
+              <CheckSquare className={`size-3.5 ${selectMode ? "text-primary" : ""}`} />
             </Button>
           </div>
         )}
@@ -172,16 +169,13 @@ export function SidebarSessions({
               </Button>
             )}
             <span className="text-xs text-muted-foreground">
-              {selectedIds.size > 0 ? `${selectedIds.size} of ${filteredSessions.length} selected` : `${filteredSessions.length} conversations`}
+              {selectedIds.size > 0
+                ? `${selectedIds.size} of ${filteredSessions.length} selected`
+                : `${filteredSessions.length} conversations`}
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={handleSelectAll}
-          >
-            {filteredSessions.every((s) => selectedIds.has(s.session_id)) ? (
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={handleSelectAll}>
+            {filteredSessions.every(s => selectedIds.has(s.session_id)) ? (
               <>
                 <Check className="mr-1 size-3" />
                 Deselect
@@ -199,9 +193,7 @@ export function SidebarSessions({
       <SidebarGroupContent>
         <SidebarMenu>
           {isLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <SidebarMenuSkeleton key={i} showIcon />
-            ))
+            Array.from({ length: 8 }).map((_, i) => <SidebarMenuSkeleton key={i} showIcon />)
           ) : filteredSessions.length > 0 ? (
             <>
               {totalCount > SESSIONS_PAGE_SIZE && (
@@ -210,7 +202,7 @@ export function SidebarSessions({
                 </div>
               )}
 
-              {filteredSessions.map((session) => (
+              {filteredSessions.map(session => (
                 <SidebarSessionItem
                   key={session.session_id}
                   session={session}
@@ -237,8 +229,8 @@ export function SidebarSessions({
                       </>
                     ) : (
                       <>
-                        <ChevronDown className="mr-1.5 size-3" />
-                        +{totalCount - filteredSessions.length} more
+                        <ChevronDown className="mr-1.5 size-3" />+
+                        {totalCount - filteredSessions.length} more
                       </>
                     )}
                   </Button>
@@ -247,11 +239,11 @@ export function SidebarSessions({
             </>
           ) : (
             <div className="px-2 text-xs text-muted-foreground">
-              {searchQuery ? 'No matching conversations' : 'No conversations yet'}
+              {searchQuery ? "No matching conversations" : "No conversations yet"}
             </div>
           )}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+  )
 }

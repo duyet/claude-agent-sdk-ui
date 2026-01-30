@@ -1,9 +1,9 @@
-'use client';
-import { Button } from '@/components/ui/button';
-import { MessageSquarePlus } from 'lucide-react';
+"use client"
+import { MessageSquarePlus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface NewSessionButtonProps {
-  onClick?: () => void;
+  onClick?: () => void
 }
 
 export function NewSessionButton({ onClick }: NewSessionButtonProps) {
@@ -16,5 +16,5 @@ export function NewSessionButton({ onClick }: NewSessionButtonProps) {
       <MessageSquarePlus className="h-4 w-4" />
       New conversation
     </Button>
-  );
+  )
 }

@@ -1,32 +1,32 @@
-'use client';
+"use client"
 
-import { Sun, Moon, Laptop } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Laptop, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar';
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 
 export function SidebarSettings() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme()
 
   const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Laptop },
-  ];
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: "System", icon: Laptop },
+  ]
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Theme</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {themeOptions.map((option) => {
-            const Icon = option.icon;
+          {themeOptions.map(option => {
+            const Icon = option.icon
             return (
               <SidebarMenuItem key={option.value}>
                 <SidebarMenuButton
@@ -38,10 +38,10 @@ export function SidebarSettings() {
                   <span>{option.label}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            );
+            )
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+  )
 }

@@ -1,14 +1,14 @@
-'use client';
+"use client"
 
-import { Search, X } from 'lucide-react';
-import { SidebarInput } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
+import { Search, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { SidebarInput } from "@/components/ui/sidebar"
 
 interface SidebarSearchProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  expanded: boolean;
-  setExpanded: (expanded: boolean) => void;
+  searchQuery: string
+  setSearchQuery: (query: string) => void
+  expanded: boolean
+  setExpanded: (expanded: boolean) => void
 }
 
 export function SidebarSearch({
@@ -18,7 +18,7 @@ export function SidebarSearch({
   setExpanded,
 }: SidebarSearchProps) {
   if (!expanded) {
-    return null;
+    return null
   }
 
   return (
@@ -29,7 +29,7 @@ export function SidebarSearch({
           type="text"
           placeholder="Search conversations..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="pl-9 pr-9"
           autoFocus
         />
@@ -38,12 +38,12 @@ export function SidebarSearch({
             variant="ghost"
             size="icon"
             className="absolute right-2 top-1/2 size-6 -translate-y-1/2"
-            onClick={() => setSearchQuery('')}
+            onClick={() => setSearchQuery("")}
           >
             <X className="size-3" />
           </Button>
         )}
       </div>
     </div>
-  );
+  )
 }

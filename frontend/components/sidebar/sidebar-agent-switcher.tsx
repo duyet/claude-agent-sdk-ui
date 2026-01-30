@@ -1,39 +1,39 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { ChevronsUpDown, Bot, Check } from 'lucide-react';
-import { useAgents } from '@/hooks/use-agents';
-import { useChatStore } from '@/lib/store/chat-store';
-import type { AgentInfo } from '@/types';
+import { Bot, Check, ChevronsUpDown } from "lucide-react"
+import * as React from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
   useSidebar,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar"
+import { useAgents } from "@/hooks/use-agents"
+import { useChatStore } from "@/lib/store/chat-store"
+import type { AgentInfo } from "@/types"
 
 export function SidebarAgentSwitcher() {
-  const { isMobile } = useSidebar();
-  const { data: agents, isLoading } = useAgents();
-  const agentId = useChatStore((s) => s.agentId);
-  const setAgentId = useChatStore((s) => s.setAgentId);
+  const { isMobile } = useSidebar()
+  const { data: agents, isLoading } = useAgents()
+  const agentId = useChatStore(s => s.agentId)
+  const setAgentId = useChatStore(s => s.setAgentId)
 
   const activeAgent = React.useMemo(() => {
-    if (!agents?.length) return null;
+    if (!agents?.length) return null
     return (
       agents.find((a: AgentInfo) => a.agent_id === agentId) ||
       agents.find((a: AgentInfo) => a.is_default) ||
       agents[0]
-    );
-  }, [agents, agentId]);
+    )
+  }, [agents, agentId])
 
   if (isLoading) {
     return (
@@ -42,7 +42,7 @@ export function SidebarAgentSwitcher() {
           <SidebarMenuSkeleton showIcon />
         </SidebarMenuItem>
       </SidebarMenu>
-    );
+    )
   }
 
   return (
@@ -58,12 +58,8 @@ export function SidebarAgentSwitcher() {
                 <Bot className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {activeAgent?.name || 'Select Agent'}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {activeAgent?.model}
-                </span>
+                <span className="truncate font-medium">{activeAgent?.name || "Select Agent"}</span>
+                <span className="truncate text-xs text-muted-foreground">{activeAgent?.model}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -71,12 +67,10 @@ export function SidebarAgentSwitcher() {
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             align="start"
-            side={isMobile ? 'bottom' : 'right'}
+            side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Agents
-            </DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Agents</DropdownMenuLabel>
             {agents?.map((agent: AgentInfo) => (
               <DropdownMenuItem
                 key={agent.agent_id}
@@ -88,13 +82,9 @@ export function SidebarAgentSwitcher() {
                 </div>
                 <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
                   <span className="truncate text-sm">{agent.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {agent.model}
-                  </span>
+                  <span className="truncate text-xs text-muted-foreground">{agent.model}</span>
                 </div>
-                {agent.agent_id === agentId && (
-                  <Check className="size-4 text-primary" />
-                )}
+                {agent.agent_id === agentId && <Check className="size-4 text-primary" />}
                 {agent.is_default && (
                   <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     default
@@ -106,5 +96,5 @@ export function SidebarAgentSwitcher() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
+  )
 }

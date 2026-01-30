@@ -1,6 +1,16 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
+import { useState } from "react"
+import {
+  SidebarAgentSwitcher,
+  SidebarHelp,
+  SidebarNewSession,
+  SidebarSearch,
+  SidebarSessions,
+  SidebarSettings,
+  SidebarUserNav,
+} from "@/components/sidebar"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sidebar,
   SidebarContent,
@@ -8,22 +18,12 @@ import {
   SidebarHeader,
   SidebarRail,
   SidebarSeparator,
-} from '@/components/ui/sidebar';
-import {
-  SidebarAgentSwitcher,
-  SidebarNewSession,
-  SidebarSearch,
-  SidebarSessions,
-  SidebarSettings,
-  SidebarHelp,
-  SidebarUserNav,
-} from '@/components/sidebar';
-import { ScrollArea } from '@/components/ui/scroll-area';
+} from "@/components/ui/sidebar"
 
 export function AppSidebar() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchExpanded, setSearchExpanded] = useState(false);
-  const [selectMode, setSelectMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchExpanded, setSearchExpanded] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -60,5 +60,5 @@ export function AppSidebar() {
 
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }

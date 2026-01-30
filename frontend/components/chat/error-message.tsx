@@ -1,10 +1,10 @@
-'use client';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+"use client"
+import { AlertCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface ErrorMessageProps {
-  error: string;
-  onRetry?: () => void;
+  error: string
+  onRetry?: () => void
 }
 
 export function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
@@ -20,5 +20,5 @@ export function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
         </Button>
       )}
     </div>
-  );
+  )
 }

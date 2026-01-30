@@ -1,95 +1,95 @@
-'use client';
+"use client"
 
-import { cn } from '@/lib/utils';
-import { getToolColorStyles } from '@/lib/tool-config';
-import { Plus, RefreshCw, ListTodo, FileSearch2 } from 'lucide-react';
+import { FileSearch2, ListTodo, Plus, RefreshCw } from "lucide-react"
+import { getToolColorStyles } from "@/lib/tool-config"
+import { cn } from "@/lib/utils"
 
 interface ToolInputDisplayProps {
-  toolName: string;
-  input: Record<string, unknown>;
-  expanded?: boolean;
+  toolName: string
+  input: Record<string, unknown>
+  expanded?: boolean
 }
 
 /**
  * Renders tool-specific input display with appropriate formatting.
  */
 export function ToolInputDisplay({ toolName, input }: ToolInputDisplayProps) {
-  const colorStyles = getToolColorStyles(toolName);
+  const colorStyles = getToolColorStyles(toolName)
 
   // Bash command
-  if (toolName === 'Bash') {
-    return <BashInputDisplay input={input} />;
+  if (toolName === "Bash") {
+    return <BashInputDisplay input={input} />
   }
 
   // Read file
-  if (toolName === 'Read') {
-    return <ReadInputDisplay input={input} colorStyles={colorStyles} />;
+  if (toolName === "Read") {
+    return <ReadInputDisplay input={input} colorStyles={colorStyles} />
   }
 
   // Write/Edit file
-  if (toolName === 'Write' || toolName === 'Edit') {
-    return <WriteEditInputDisplay input={input} colorStyles={colorStyles} />;
+  if (toolName === "Write" || toolName === "Edit") {
+    return <WriteEditInputDisplay input={input} colorStyles={colorStyles} />
   }
 
   // Grep/Glob search
-  if (toolName === 'Grep' || toolName === 'Glob') {
-    return <SearchInputDisplay input={input} colorStyles={colorStyles} />;
+  if (toolName === "Grep" || toolName === "Glob") {
+    return <SearchInputDisplay input={input} colorStyles={colorStyles} />
   }
 
   // Task delegation
-  if (toolName === 'Task') {
-    return <TaskInputDisplay input={input} colorStyles={colorStyles} />;
+  if (toolName === "Task") {
+    return <TaskInputDisplay input={input} colorStyles={colorStyles} />
   }
 
   // WebFetch
-  if (toolName === 'WebFetch') {
-    return <WebFetchInputDisplay input={input} />;
+  if (toolName === "WebFetch") {
+    return <WebFetchInputDisplay input={input} />
   }
 
   // WebSearch
-  if (toolName === 'WebSearch') {
-    return <WebSearchInputDisplay input={input} />;
+  if (toolName === "WebSearch") {
+    return <WebSearchInputDisplay input={input} />
   }
 
   // AskUserQuestion
-  if (toolName === 'AskUserQuestion') {
-    return <AskUserQuestionInputDisplay input={input} />;
+  if (toolName === "AskUserQuestion") {
+    return <AskUserQuestionInputDisplay input={input} />
   }
 
   // TodoWrite
-  if (toolName === 'TodoWrite') {
-    return <TodoWriteInputDisplay input={input} />;
+  if (toolName === "TodoWrite") {
+    return <TodoWriteInputDisplay input={input} />
   }
 
   // TaskCreate
-  if (toolName === 'TaskCreate') {
-    return <TaskCreateInputDisplay input={input} />;
+  if (toolName === "TaskCreate") {
+    return <TaskCreateInputDisplay input={input} />
   }
 
   // TaskUpdate
-  if (toolName === 'TaskUpdate') {
-    return <TaskUpdateInputDisplay input={input} />;
+  if (toolName === "TaskUpdate") {
+    return <TaskUpdateInputDisplay input={input} />
   }
 
   // TaskList
-  if (toolName === 'TaskList') {
-    return <TaskListInputDisplay />;
+  if (toolName === "TaskList") {
+    return <TaskListInputDisplay />
   }
 
   // TaskGet
-  if (toolName === 'TaskGet') {
-    return <TaskGetInputDisplay input={input} />;
+  if (toolName === "TaskGet") {
+    return <TaskGetInputDisplay input={input} />
   }
 
   // Fallback: JSON display
-  return <JsonInputDisplay input={input} />;
+  return <JsonInputDisplay input={input} />
 }
 
 // --- Tool-specific input displays ---
 
 function BashInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const command = input.command as string | undefined;
-  const description = input.description as string | undefined;
+  const command = input.command as string | undefined
+  const description = input.description as string | undefined
 
   return (
     <div className="space-y-2">
@@ -99,31 +99,31 @@ function BashInputDisplay({ input }: { input: Record<string, unknown> }) {
       {command && (
         <pre
           className="p-2.5 rounded-md text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all bg-muted/50 border border-border/50"
-          style={{ color: 'hsl(var(--code-fg))' }}
+          style={{ color: "hsl(var(--code-fg))" }}
         >
-          <span style={{ color: 'hsl(var(--code-prompt))' }} className="select-none">
-            ${' '}
+          <span style={{ color: "hsl(var(--code-prompt))" }} className="select-none">
+            ${" "}
           </span>
           {command}
         </pre>
       )}
-      {typeof input.timeout === 'number' && (
+      {typeof input.timeout === "number" && (
         <p className="text-xs sm:text-[11px] text-muted-foreground">Timeout: {input.timeout}ms</p>
       )}
     </div>
-  );
+  )
 }
 
 function ReadInputDisplay({
   input,
   colorStyles,
 }: {
-  input: Record<string, unknown>;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
+  input: Record<string, unknown>
+  colorStyles: ReturnType<typeof getToolColorStyles>
 }) {
-  const filePath = input.file_path as string | undefined;
-  const offset = input.offset as number | undefined;
-  const limit = input.limit as number | undefined;
+  const filePath = input.file_path as string | undefined
+  const offset = input.offset as number | undefined
+  const limit = input.limit as number | undefined
 
   return (
     <div className="space-y-2">
@@ -145,24 +145,24 @@ function ReadInputDisplay({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function WriteEditInputDisplay({
   input,
   colorStyles,
 }: {
-  input: Record<string, unknown>;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
+  input: Record<string, unknown>
+  colorStyles: ReturnType<typeof getToolColorStyles>
 }) {
-  const filePath = input.file_path as string | undefined;
-  const content = input.content as string | undefined;
-  const oldString = input.old_string as string | undefined;
-  const newString = input.new_string as string | undefined;
-  const replaceAll = input.replace_all as boolean | undefined;
+  const filePath = input.file_path as string | undefined
+  const content = input.content as string | undefined
+  const oldString = input.old_string as string | undefined
+  const newString = input.new_string as string | undefined
+  const replaceAll = input.replace_all as boolean | undefined
 
   // Determine if this is an Edit operation (has old_string and new_string)
-  const isEditOperation = oldString !== undefined && newString !== undefined;
+  const isEditOperation = oldString !== undefined && newString !== undefined
 
   return (
     <div className="space-y-2">
@@ -188,7 +188,7 @@ function WriteEditInputDisplay({
         <div>
           <span className="text-xs sm:text-[11px] text-muted-foreground block mb-1">Content:</span>
           <pre className="bg-muted/40 border border-border/50 p-1.5 sm:p-2 rounded text-xs font-mono max-h-24 sm:max-h-32 overflow-auto whitespace-pre-wrap break-all">
-            {content.length > 500 ? content.slice(0, 500) + '\n... (truncated)' : content}
+            {content.length > 500 ? `${content.slice(0, 500)}\n... (truncated)` : content}
           </pre>
         </div>
       )}
@@ -198,7 +198,7 @@ function WriteEditInputDisplay({
         <div>
           <span className="text-xs sm:text-[11px] text-muted-foreground block mb-1">Changes:</span>
           {/* Use InlineDiff for shorter content, DiffView for longer */}
-          {(oldString.length + newString.length) < 300 ? (
+          {oldString.length + newString.length < 300 ? (
             <InlineDiff oldContent={oldString} newContent={newString} />
           ) : (
             <DiffView
@@ -211,19 +211,19 @@ function WriteEditInputDisplay({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function SearchInputDisplay({
   input,
   colorStyles,
 }: {
-  input: Record<string, unknown>;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
+  input: Record<string, unknown>
+  colorStyles: ReturnType<typeof getToolColorStyles>
 }) {
-  const pattern = input.pattern as string | undefined;
-  const path = input.path as string | undefined;
-  const glob = input.glob as string | undefined;
+  const pattern = input.pattern as string | undefined
+  const path = input.path as string | undefined
+  const glob = input.glob as string | undefined
 
   return (
     <div className="space-y-2">
@@ -255,19 +255,19 @@ function SearchInputDisplay({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function TaskInputDisplay({
   input,
   colorStyles,
 }: {
-  input: Record<string, unknown>;
-  colorStyles: ReturnType<typeof getToolColorStyles>;
+  input: Record<string, unknown>
+  colorStyles: ReturnType<typeof getToolColorStyles>
 }) {
-  const description = input.description as string | undefined;
-  const subagent = input.subagent as string | undefined;
-  const subagentType = input.subagent_type as string | undefined;
+  const description = input.description as string | undefined
+  const subagent = input.subagent as string | undefined
+  const subagentType = input.subagent_type as string | undefined
 
   return (
     <div className="space-y-2">
@@ -296,12 +296,12 @@ function TaskInputDisplay({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function WebFetchInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const url = input.url as string | undefined;
-  const query = input.query as string | undefined;
+  const url = input.url as string | undefined
+  const query = input.query as string | undefined
 
   return (
     <div className="space-y-2">
@@ -320,12 +320,12 @@ function WebFetchInputDisplay({ input }: { input: Record<string, unknown> }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function WebSearchInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const query = input.query as string | undefined;
-  const url = input.url as string | undefined;
+  const query = input.query as string | undefined
+  const url = input.url as string | undefined
 
   return (
     <div className="space-y-2">
@@ -344,23 +344,21 @@ function WebSearchInputDisplay({ input }: { input: Record<string, unknown> }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function AskUserQuestionInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const questions = input.questions as Array<{
-    question: string;
-    header?: string;
-    options?: Array<{ label: string; description?: string }>;
-    multiSelect?: boolean;
-  }> | undefined;
+  const questions = input.questions as
+    | Array<{
+        question: string
+        header?: string
+        options?: Array<{ label: string; description?: string }>
+        multiSelect?: boolean
+      }>
+    | undefined
 
   if (!questions || questions.length === 0) {
-    return (
-      <div className="text-[11px] text-muted-foreground italic">
-        No questions defined
-      </div>
-    );
+    return <div className="text-[11px] text-muted-foreground italic">No questions defined</div>
   }
 
   return (
@@ -395,35 +393,33 @@ function AskUserQuestionInputDisplay({ input }: { input: Record<string, unknown>
           {q.multiSelect !== undefined && (
             <div className="flex items-center gap-1.5 mt-1">
               <span className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded bg-muted/50 border border-border/50">
-                {q.multiSelect ? 'Multiple selection' : 'Single selection'}
+                {q.multiSelect ? "Multiple selection" : "Single selection"}
               </span>
             </div>
           )}
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 function TodoWriteInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const todos = input.todos as Array<{
-    content: string;
-    status?: string;
-    activeForm?: string;
-  }> | undefined;
+  const todos = input.todos as
+    | Array<{
+        content: string
+        status?: string
+        activeForm?: string
+      }>
+    | undefined
 
   if (!todos || todos.length === 0) {
-    return (
-      <div className="text-[11px] text-muted-foreground italic">
-        No todos defined
-      </div>
-    );
+    return <div className="text-[11px] text-muted-foreground italic">No todos defined</div>
   }
 
   return (
     <div className="space-y-1.5">
       {todos.map((todo, idx) => {
-        const isPending = !todo.status || todo.status === 'pending';
+        const isPending = !todo.status || todo.status === "pending"
         return (
           <div
             key={idx}
@@ -451,9 +447,7 @@ function TodoWriteInputDisplay({ input }: { input: Record<string, unknown> }) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-foreground">
-                {todo.activeForm || todo.content}
-              </div>
+              <div className="font-medium text-foreground">{todo.activeForm || todo.content}</div>
               {todo.activeForm && todo.activeForm !== todo.content && (
                 <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">
                   {todo.content}
@@ -463,40 +457,38 @@ function TodoWriteInputDisplay({ input }: { input: Record<string, unknown> }) {
             {todo.status && (
               <span
                 className={cn(
-                  'text-xs sm:text-[10px] px-1.5 py-0.5 rounded shrink-0',
+                  "text-xs sm:text-[10px] px-1.5 py-0.5 rounded shrink-0",
                   isPending
-                    ? 'bg-status-warning-bg text-status-warning border border-status-warning/20'
-                    : 'bg-status-success-bg text-status-success border border-status-success/20'
+                    ? "bg-status-warning-bg text-status-warning border border-status-warning/20"
+                    : "bg-status-success-bg text-status-success border border-status-success/20",
                 )}
               >
                 {todo.status}
               </span>
             )}
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 // --- Task Management Tool Displays ---
 
 function TaskCreateInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const subject = input.subject as string | undefined;
-  const description = input.description as string | undefined;
-  const activeForm = input.activeForm as string | undefined;
+  const subject = input.subject as string | undefined
+  const description = input.description as string | undefined
+  const activeForm = input.activeForm as string | undefined
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Plus className="h-3.5 w-3.5 text-status-success" />
-        <span className="text-xs font-medium text-foreground">
-          {subject || 'New task'}
-        </span>
+        <span className="text-xs font-medium text-foreground">{subject || "New task"}</span>
       </div>
       {description && (
         <p className="text-xs sm:text-[11px] text-muted-foreground leading-relaxed pl-5">
-          {description.length > 150 ? description.slice(0, 150) + '...' : description}
+          {description.length > 150 ? `${description.slice(0, 150)}...` : description}
         </p>
       )}
       {activeForm && (
@@ -507,62 +499,56 @@ function TaskCreateInputDisplay({ input }: { input: Record<string, unknown> }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function TaskUpdateInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const taskId = input.taskId as string | undefined;
-  const status = input.status as string | undefined;
-  const subject = input.subject as string | undefined;
-  const owner = input.owner as string | undefined;
-  const addBlocks = input.addBlocks as string[] | undefined;
-  const addBlockedBy = input.addBlockedBy as string[] | undefined;
+  const taskId = input.taskId as string | undefined
+  const status = input.status as string | undefined
+  const subject = input.subject as string | undefined
+  const owner = input.owner as string | undefined
+  const addBlocks = input.addBlocks as string[] | undefined
+  const addBlockedBy = input.addBlockedBy as string[] | undefined
 
   const statusConfig: Record<string, { color: string; bg: string }> = {
-    pending: { color: 'text-status-warning-fg', bg: 'bg-status-warning-bg' },
-    in_progress: { color: 'text-status-info-fg', bg: 'bg-status-info-bg' },
-    completed: { color: 'text-status-success-fg', bg: 'bg-status-success-bg' },
-  };
+    pending: { color: "text-status-warning-fg", bg: "bg-status-warning-bg" },
+    in_progress: { color: "text-status-info-fg", bg: "bg-status-info-bg" },
+    completed: { color: "text-status-success-fg", bg: "bg-status-success-bg" },
+  }
 
-  const statusStyle = status ? statusConfig[status] : null;
+  const statusStyle = status ? statusConfig[status] : null
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
         <RefreshCw className="h-3.5 w-3.5 text-status-info" />
-        <span className="text-xs sm:text-[11px] text-muted-foreground">
-          Task
-        </span>
+        <span className="text-xs sm:text-[11px] text-muted-foreground">Task</span>
         <code className="text-xs font-mono px-1.5 py-0.5 rounded bg-muted/50 border border-border/50">
           #{taskId}
         </code>
         {status && statusStyle && (
           <span
             className={cn(
-              'text-xs sm:text-[10px] px-1.5 py-0.5 rounded font-medium',
+              "text-xs sm:text-[10px] px-1.5 py-0.5 rounded font-medium",
               statusStyle.color,
-              statusStyle.bg
+              statusStyle.bg,
             )}
           >
-            {status.replace('_', ' ')}
+            {status.replace("_", " ")}
           </span>
         )}
       </div>
-      {subject && (
-        <p className="text-xs font-medium text-foreground pl-5">{subject}</p>
-      )}
+      {subject && <p className="text-xs font-medium text-foreground pl-5">{subject}</p>}
       {owner && (
         <div className="flex items-center gap-1.5 pl-5 text-xs sm:text-[11px] text-muted-foreground">
           <span>Assigned to:</span>
-          <code className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">
-            {owner}
-          </code>
+          <code className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">{owner}</code>
         </div>
       )}
       {addBlocks && addBlocks.length > 0 && (
         <div className="flex items-center gap-1.5 pl-5 text-xs sm:text-[11px] text-muted-foreground">
           <span>Blocks:</span>
-          {addBlocks.map((id) => (
+          {addBlocks.map(id => (
             <code key={id} className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">
               #{id}
             </code>
@@ -572,7 +558,7 @@ function TaskUpdateInputDisplay({ input }: { input: Record<string, unknown> }) {
       {addBlockedBy && addBlockedBy.length > 0 && (
         <div className="flex items-center gap-1.5 pl-5 text-xs sm:text-[11px] text-muted-foreground">
           <span>Blocked by:</span>
-          {addBlockedBy.map((id) => (
+          {addBlockedBy.map(id => (
             <code key={id} className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">
               #{id}
             </code>
@@ -580,7 +566,7 @@ function TaskUpdateInputDisplay({ input }: { input: Record<string, unknown> }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function TaskListInputDisplay() {
@@ -589,11 +575,11 @@ function TaskListInputDisplay() {
       <ListTodo className="h-3.5 w-3.5 text-purple-500" />
       <span>Listing all tasks</span>
     </div>
-  );
+  )
 }
 
 function TaskGetInputDisplay({ input }: { input: Record<string, unknown> }) {
-  const taskId = input.taskId as string | undefined;
+  const taskId = input.taskId as string | undefined
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-[11px]">
@@ -603,7 +589,7 @@ function TaskGetInputDisplay({ input }: { input: Record<string, unknown> }) {
         #{taskId}
       </code>
     </div>
-  );
+  )
 }
 
 function JsonInputDisplay({ input }: { input: Record<string, unknown> }) {
@@ -611,38 +597,28 @@ function JsonInputDisplay({ input }: { input: Record<string, unknown> }) {
     <pre className="bg-muted/40 border border-border/50 p-2 sm:p-3 rounded text-xs font-mono overflow-auto max-h-48 sm:max-h-64 whitespace-pre-wrap break-all">
       {JSON.stringify(input, null, 2)}
     </pre>
-  );
+  )
 }
 
 // --- Inline diff components for Edit tool display ---
 
-function InlineDiff({
-  oldContent,
-  newContent,
-}: {
-  oldContent: string;
-  newContent: string;
-}) {
+function InlineDiff({ oldContent, newContent }: { oldContent: string; newContent: string }) {
   return (
     <div className="space-y-1.5">
-      <div
-        className="bg-diff-removed-bg p-1.5 sm:p-2 rounded text-[11px] sm:text-xs font-mono whitespace-pre-wrap break-all border border-border/50"
-      >
+      <div className="bg-diff-removed-bg p-1.5 sm:p-2 rounded text-[11px] sm:text-xs font-mono whitespace-pre-wrap break-all border border-border/50">
         <span className="text-diff-removed-fg select-none mr-2">-</span>
         <span className="text-diff-removed-fg line-through opacity-80">
-          {oldContent.length > 200 ? oldContent.slice(0, 200) + '...' : oldContent}
+          {oldContent.length > 200 ? `${oldContent.slice(0, 200)}...` : oldContent}
         </span>
       </div>
-      <div
-        className="bg-diff-added-bg p-1.5 sm:p-2 rounded text-[11px] sm:text-xs font-mono whitespace-pre-wrap break-all border border-border/50"
-      >
+      <div className="bg-diff-added-bg p-1.5 sm:p-2 rounded text-[11px] sm:text-xs font-mono whitespace-pre-wrap break-all border border-border/50">
         <span className="text-diff-added-fg select-none mr-2">+</span>
         <span className="text-diff-added-fg">
-          {newContent.length > 200 ? newContent.slice(0, 200) + '...' : newContent}
+          {newContent.length > 200 ? `${newContent.slice(0, 200)}...` : newContent}
         </span>
       </div>
     </div>
-  );
+  )
 }
 
 function DiffView({
@@ -650,10 +626,10 @@ function DiffView({
   newContent,
   fileName,
 }: {
-  oldContent: string;
-  newContent: string;
-  fileName?: string;
-  maxLines?: number;
+  oldContent: string
+  newContent: string
+  fileName?: string
+  maxLines?: number
 }) {
   // Simple fallback - just show inline diff with file header
   return (
@@ -667,46 +643,40 @@ function DiffView({
         <InlineDiff oldContent={oldContent} newContent={newContent} />
       </div>
     </div>
-  );
+  )
 }
 
 /**
  * Display tool result content with proper formatting.
  */
-export function ToolResultDisplay({
-  content,
-  isError,
-}: {
-  content: string;
-  isError?: boolean;
-}) {
-  if (!content) return null;
+export function ToolResultDisplay({ content, isError }: { content: string; isError?: boolean }) {
+  if (!content) return null
 
   // Try to parse as JSON for pretty display
-  let formattedContent = content;
-  let isJson = false;
+  let formattedContent = content
+  let isJson = false
   try {
-    const parsed = JSON.parse(content);
-    formattedContent = JSON.stringify(parsed, null, 2);
-    isJson = true;
+    const parsed = JSON.parse(content)
+    formattedContent = JSON.stringify(parsed, null, 2)
+    isJson = true
   } catch {
     // Not JSON, use as-is
   }
 
-  const lines = formattedContent.split('\n');
-  const isLong = lines.length > 10;
-  const preview = isLong ? lines.slice(0, 10).join('\n') + '\n...' : formattedContent;
+  const lines = formattedContent.split("\n")
+  const isLong = lines.length > 10
+  const preview = isLong ? `${lines.slice(0, 10).join("\n")}\n...` : formattedContent
 
   return (
     <pre
       className={cn(
-        'text-xs sm:text-[11px] font-mono whitespace-pre-wrap break-all rounded p-1.5 sm:p-2 max-h-48 sm:max-h-64 overflow-auto',
+        "text-xs sm:text-[11px] font-mono whitespace-pre-wrap break-all rounded p-1.5 sm:p-2 max-h-48 sm:max-h-64 overflow-auto",
         isError
-          ? 'bg-destructive/5 text-destructive border border-destructive/20'
-          : 'bg-muted/30 text-foreground border border-border/30'
+          ? "bg-destructive/5 text-destructive border border-destructive/20"
+          : "bg-muted/30 text-foreground border border-border/30",
       )}
     >
       {isJson ? <code>{formattedContent}</code> : <code>{preview}</code>}
     </pre>
-  );
+  )
 }

@@ -1,48 +1,47 @@
-'use client';
+"use client"
 
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { Check, Circle } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuestionStore } from '@/lib/store/question-store';
-import type { UIQuestion } from '@/types';
-import { cn } from '@/lib/utils';
-import { Check, Circle } from 'lucide-react';
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useQuestionStore } from "@/lib/store/question-store"
+import type { UIQuestion } from "@/types"
 
 /**
  * Hook to detect if the device supports hover (non-touch device)
  */
 function useSupportsHover() {
-  const [supportsHover, setSupportsHover] = useState(true);
+  const [supportsHover, setSupportsHover] = useState(true)
 
   useEffect(() => {
     // Check if the device supports hover (pointer: fine means mouse/trackpad)
-    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-    setSupportsHover(mediaQuery.matches);
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)")
+    setSupportsHover(mediaQuery.matches)
 
-    const handler = (e: MediaQueryListEvent) => setSupportsHover(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
+    const handler = (e: MediaQueryListEvent) => setSupportsHover(e.matches)
+    mediaQuery.addEventListener("change", handler)
+    return () => mediaQuery.removeEventListener("change", handler)
+  }, [])
 
-  return supportsHover;
+  return supportsHover
 }
 
 interface QuestionModalProps {
-  onSubmit: (questionId: string, answers: Record<string, string | string[]>) => void;
+  onSubmit: (questionId: string, answers: Record<string, string | string[]>) => void
 }
 
-const OTHER_OPTION_VALUE = '__other__';
+const OTHER_OPTION_VALUE = "__other__"
 
 export function QuestionModal({ onSubmit }: QuestionModalProps) {
   const {
@@ -55,80 +54,80 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
     setAnswer,
     tick,
     closeModal,
-  } = useQuestionStore();
+  } = useQuestionStore()
 
-  const [activeTab, setActiveTab] = useState('0');
+  const [activeTab, setActiveTab] = useState("0")
 
   // Reset active tab when modal opens
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('0');
+      setActiveTab("0")
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Countdown timer
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const interval = setInterval(() => {
-      tick();
-    }, 1000);
+      tick()
+    }, 1000)
 
-    return () => clearInterval(interval);
-  }, [isOpen, tick]);
+    return () => clearInterval(interval)
+  }, [isOpen, tick])
 
   // Auto-close on timeout
   useEffect(() => {
     if (remainingSeconds === 0 && isOpen) {
-      closeModal();
+      closeModal()
     }
-  }, [remainingSeconds, isOpen, closeModal]);
+  }, [remainingSeconds, isOpen, closeModal])
 
   const handleSubmit = useCallback(() => {
     if (questionId) {
-      onSubmit(questionId, answers);
-      closeModal();
+      onSubmit(questionId, answers)
+      closeModal()
     }
-  }, [questionId, answers, onSubmit, closeModal]);
+  }, [questionId, answers, onSubmit, closeModal])
 
   const handleSkip = useCallback(() => {
     if (questionId) {
       // Send empty answers to let agent know user skipped
-      onSubmit(questionId, {});
-      closeModal();
+      onSubmit(questionId, {})
+      closeModal()
     }
-  }, [questionId, onSubmit, closeModal]);
+  }, [questionId, onSubmit, closeModal])
 
-  const progressPercent = timeoutSeconds > 0 ? (remainingSeconds / timeoutSeconds) * 100 : 0;
+  const progressPercent = timeoutSeconds > 0 ? (remainingSeconds / timeoutSeconds) * 100 : 0
 
   /**
    * Get progress bar color CSS variable based on remaining time percentage.
    */
   function getProgressColorVar(): string {
-    if (progressPercent > 50) return '--progress-high';
-    if (progressPercent > 25) return '--progress-medium';
-    return '--progress-low';
+    if (progressPercent > 50) return "--progress-high"
+    if (progressPercent > 25) return "--progress-medium"
+    return "--progress-low"
   }
 
   // Check if a specific question is answered
   const isQuestionAnswered = (q: UIQuestion) => {
-    const answer = answers[q.question];
-    if (!answer) return false;
+    const answer = answers[q.question]
+    if (!answer) return false
     if (q.allowMultiple) {
-      const arr = answer as string[];
-      return arr.length > 0;
+      const arr = answer as string[]
+      return arr.length > 0
     }
-    return answer !== '' && answer !== OTHER_OPTION_VALUE;
-  };
+    return answer !== "" && answer !== OTHER_OPTION_VALUE
+  }
 
   // Validate all questions are answered
-  const isValid = questions.every(isQuestionAnswered);
+  const isValid = questions.every(isQuestionAnswered)
 
   // Count answered questions
-  const answeredCount = questions.filter(isQuestionAnswered).length;
+  const answeredCount = questions.filter(isQuestionAnswered).length
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && closeModal()}>
       <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="space-y-2 sm:space-y-0">
           <DialogTitle className="flex items-center justify-between pr-8 text-base sm:text-lg">
@@ -154,7 +153,11 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
         </div>
 
         {questions.length > 0 && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="flex-1 overflow-hidden flex flex-col"
+          >
             <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden flex-shrink-0 h-auto min-h-[44px] sm:min-h-0 gap-1 sm:gap-0 p-1 sm:p-0">
               {questions.map((q, idx) => (
                 <TabsTrigger
@@ -165,14 +168,12 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
                   {isQuestionAnswered(q) ? (
                     <Check
                       className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0"
-                      style={{ color: 'hsl(var(--progress-high))' }}
+                      style={{ color: "hsl(var(--progress-high))" }}
                     />
                   ) : (
                     <Circle className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-muted-foreground" />
                   )}
-                  <span className="truncate max-w-[80px] sm:max-w-[120px]">
-                    Q{idx + 1}
-                  </span>
+                  <span className="truncate max-w-[80px] sm:max-w-[120px]">Q{idx + 1}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -183,7 +184,7 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
                   <QuestionItem
                     question={question}
                     value={answers[question.question]}
-                    onChange={(value) => setAnswer(question.question, value)}
+                    onChange={value => setAnswer(question.question, value)}
                   />
                 </TabsContent>
               ))}
@@ -196,7 +197,7 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
             <Button
               variant="outline"
               size="sm"
-              disabled={activeTab === '0'}
+              disabled={activeTab === "0"}
               onClick={() => setActiveTab(String(Number(activeTab) - 1))}
               className="flex-1 sm:flex-none h-10 sm:h-9"
             >
@@ -213,7 +214,11 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
             </Button>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
-            <Button variant="outline" onClick={handleSkip} className="flex-1 sm:flex-none h-10 sm:h-9">
+            <Button
+              variant="outline"
+              onClick={handleSkip}
+              className="flex-1 sm:flex-none h-10 sm:h-9"
+            >
               Skip
             </Button>
             <Button
@@ -227,73 +232,73 @@ export function QuestionModal({ onSubmit }: QuestionModalProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 interface QuestionItemProps {
-  question: UIQuestion;
-  value: string | string[] | undefined;
-  onChange: (value: string | string[]) => void;
+  question: UIQuestion
+  value: string | string[] | undefined
+  onChange: (value: string | string[]) => void
 }
 
 function QuestionItem({ question, value, onChange }: QuestionItemProps) {
-  const [otherText, setOtherText] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
-  const supportsHover = useSupportsHover();
-  const otherInputRef = useRef<HTMLInputElement>(null);
+  const [otherText, setOtherText] = useState("")
+  const [isOtherSelected, setIsOtherSelected] = useState(false)
+  const supportsHover = useSupportsHover()
+  const otherInputRef = useRef<HTMLInputElement>(null)
 
   // Only auto-focus on non-touch devices
   useEffect(() => {
     if (isOtherSelected && supportsHover && otherInputRef.current) {
-      otherInputRef.current.focus();
+      otherInputRef.current.focus()
     }
-  }, [isOtherSelected, supportsHover]);
+  }, [isOtherSelected, supportsHover])
 
   // Check if this is multi-select
-  const isMultiSelect = question.allowMultiple === true;
+  const isMultiSelect = question.allowMultiple === true
 
   // Handle "Other" text change for single-select
   const handleOtherTextChange = (text: string) => {
-    setOtherText(text);
+    setOtherText(text)
     if (isMultiSelect) {
       // For multi-select with "Other"
-      const currentValues = (value as string[]) || [];
-      const withoutOther = currentValues.filter((v) => !v.startsWith('Other: '));
+      const currentValues = (value as string[]) || []
+      const withoutOther = currentValues.filter(v => !v.startsWith("Other: "))
       if (text) {
-        onChange([...withoutOther, `Other: ${text}`]);
+        onChange([...withoutOther, `Other: ${text}`])
       } else {
-        onChange(withoutOther);
+        onChange(withoutOther)
       }
     } else {
       // For single-select, set the custom text as the value
       if (text) {
-        onChange(`Other: ${text}`);
+        onChange(`Other: ${text}`)
       } else {
-        onChange(OTHER_OPTION_VALUE);
+        onChange(OTHER_OPTION_VALUE)
       }
     }
-  };
+  }
 
   if (isMultiSelect) {
     // Multi-select with checkboxes
-    const selectedValues = (value as string[]) || [];
+    const selectedValues = (value as string[]) || []
 
     const handleCheckboxChange = (optionValue: string, checked: boolean) => {
       if (checked) {
-        onChange([...selectedValues, optionValue]);
+        onChange([...selectedValues, optionValue])
       } else {
-        onChange(selectedValues.filter((v) => v !== optionValue));
+        onChange(selectedValues.filter(v => v !== optionValue))
       }
-    };
+    }
 
     const handleOtherCheck = (checked: boolean) => {
-      setIsOtherSelected(checked);
+      setIsOtherSelected(checked)
       if (!checked) {
         // Remove any "Other: ..." values
-        onChange(selectedValues.filter((v) => !v.startsWith('Other: ')));
-        setOtherText('');
+        onChange(selectedValues.filter(v => !v.startsWith("Other: ")))
+        setOtherText("")
       }
-    };
+    }
 
     return (
       <div className="space-y-3 sm:space-y-4">
@@ -307,16 +312,16 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
               key={idx}
               className="flex items-start space-x-3 sm:space-x-3 p-3 sm:p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer min-h-[52px] sm:min-h-0"
               onClick={() => {
-                const checkbox = document.getElementById(`${question.question}-${idx}`) as HTMLInputElement;
-                checkbox?.click();
+                const checkbox = document.getElementById(
+                  `${question.question}-${idx}`,
+                ) as HTMLInputElement
+                checkbox?.click()
               }}
             >
               <Checkbox
                 id={`${question.question}-${idx}`}
                 checked={selectedValues.includes(option.value)}
-                onCheckedChange={(checked) =>
-                  handleCheckboxChange(option.value, checked as boolean)
-                }
+                onCheckedChange={checked => handleCheckboxChange(option.value, checked as boolean)}
                 className="mt-0.5 h-5 w-5 sm:h-4 sm:w-4"
               />
               <div className="flex flex-col flex-1 min-w-0">
@@ -340,7 +345,7 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
             <Checkbox
               id={`${question.question}-other`}
               checked={isOtherSelected}
-              onCheckedChange={(checked) => handleOtherCheck(checked as boolean)}
+              onCheckedChange={checked => handleOtherCheck(checked as boolean)}
               className="mt-0.5 h-5 w-5 sm:h-4 sm:w-4"
             />
             <div className="flex flex-col flex-1 space-y-2 min-w-0">
@@ -355,7 +360,7 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
                   ref={otherInputRef}
                   placeholder="Enter your answer..."
                   value={otherText}
-                  onChange={(e) => handleOtherTextChange(e.target.value)}
+                  onChange={e => handleOtherTextChange(e.target.value)}
                   className="max-w-md h-10 transition-all duration-200"
                 />
               )}
@@ -363,13 +368,12 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Single-select with radio buttons
-  const selectedValue = value as string | undefined;
-  const isOtherValue =
-    selectedValue === OTHER_OPTION_VALUE || selectedValue?.startsWith('Other: ');
+  const selectedValue = value as string | undefined
+  const isOtherValue = selectedValue === OTHER_OPTION_VALUE || selectedValue?.startsWith("Other: ")
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -378,15 +382,15 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
         <p className="text-xs sm:text-sm text-muted-foreground">Select one option</p>
       </div>
       <RadioGroup
-        value={isOtherValue ? OTHER_OPTION_VALUE : selectedValue || ''}
-        onValueChange={(val) => {
+        value={isOtherValue ? OTHER_OPTION_VALUE : selectedValue || ""}
+        onValueChange={val => {
           if (val === OTHER_OPTION_VALUE) {
-            setIsOtherSelected(true);
-            onChange(OTHER_OPTION_VALUE);
+            setIsOtherSelected(true)
+            onChange(OTHER_OPTION_VALUE)
           } else {
-            setIsOtherSelected(false);
-            setOtherText('');
-            onChange(val);
+            setIsOtherSelected(false)
+            setOtherText("")
+            onChange(val)
           }
         }}
         className="space-y-2 sm:space-y-3 pl-1"
@@ -396,8 +400,10 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
             key={idx}
             className="flex items-start space-x-3 sm:space-x-3 p-3 sm:p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer min-h-[52px] sm:min-h-0"
             onClick={() => {
-              const radio = document.getElementById(`${question.question}-${idx}`) as HTMLInputElement;
-              radio?.click();
+              const radio = document.getElementById(
+                `${question.question}-${idx}`,
+              ) as HTMLInputElement
+              radio?.click()
             }}
           >
             <RadioGroupItem
@@ -440,7 +446,7 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
                 ref={otherInputRef}
                 placeholder="Enter your answer..."
                 value={otherText}
-                onChange={(e) => handleOtherTextChange(e.target.value)}
+                onChange={e => handleOtherTextChange(e.target.value)}
                 className="max-w-md h-10 transition-all duration-200"
               />
             )}
@@ -448,7 +454,7 @@ function QuestionItem({ question, value, onChange }: QuestionItemProps) {
         </div>
       </RadioGroup>
     </div>
-  );
+  )
 }
 
-export default QuestionModal;
+export default QuestionModal

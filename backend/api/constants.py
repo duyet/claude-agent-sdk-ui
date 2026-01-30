@@ -14,6 +14,10 @@ class EventType(StrEnum):
     READY = "ready"
     ASK_USER_QUESTION = "ask_user_question"
     USER_ANSWER = "user_answer"
+    PLAN_APPROVAL = "plan_approval"
+    PLAN_APPROVAL_RESPONSE = "plan_approval_response"
+    AUTH = "auth"
+    AUTHENTICATED = "authenticated"
 
 
 class MessageRole(StrEnum):
@@ -24,6 +28,16 @@ class MessageRole(StrEnum):
     TOOL_RESULT = "tool_result"
 
 
+class ErrorCode(StrEnum):
+    """Structured error codes for WebSocket error events."""
+    TOKEN_EXPIRED = "TOKEN_EXPIRED"
+    TOKEN_INVALID = "TOKEN_INVALID"
+    SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
+    RATE_LIMITED = "RATE_LIMITED"
+    AGENT_NOT_FOUND = "AGENT_NOT_FOUND"
+    UNKNOWN = "UNKNOWN"
+
+
 class WSCloseCode(IntEnum):
     """WebSocket close codes for application-specific errors.
 
@@ -31,6 +45,10 @@ class WSCloseCode(IntEnum):
     """
     AUTH_FAILED = 4001
     SDK_CONNECTION_FAILED = 4002
+    TOKEN_EXPIRED = 4005
+    TOKEN_INVALID = 4006
+    RATE_LIMITED = 4007
+    AGENT_NOT_FOUND = 4008
     SESSION_NOT_FOUND = 4004
 
 

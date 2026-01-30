@@ -1,14 +1,19 @@
-'use client';
-import { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
-import { useSessions, useBatchDeleteSessions } from '@/hooks/use-sessions';
-import { useChatStore } from '@/lib/store/chat-store';
-import { useUIStore } from '@/lib/store/ui-store';
-import { SessionItem } from './session-item';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Bot, X, LogOut, User, CheckSquare, Trash2, ChevronDown, Loader2, Search, Check } from 'lucide-react';
-import { useAuth } from '@/components/providers/auth-provider';
+"use client"
+import {
+  Bot,
+  Check,
+  CheckSquare,
+  ChevronDown,
+  Loader2,
+  LogOut,
+  Search,
+  Trash2,
+  User,
+  X,
+} from "lucide-react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useAuth } from "@/components/providers/auth-provider"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,52 +21,58 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { useBatchDeleteSessions, useSessions } from "@/hooks/use-sessions"
+import { useChatStore } from "@/lib/store/chat-store"
+import { useUIStore } from "@/lib/store/ui-store"
+import { SessionItem } from "./session-item"
 
 // Memoize SessionItem to prevent unnecessary re-renders
-const MemoizedSessionItem = memo(SessionItem);
+const MemoizedSessionItem = memo(SessionItem)
 
 // Number of sessions to load initially and per "Load more" click
-const SESSIONS_PAGE_SIZE = 20;
+const SESSIONS_PAGE_SIZE = 20
 
 export function SessionSidebar() {
-  const { user, logout } = useAuth();
-  const { data: sessions, isLoading } = useSessions();
-  const sessionId = useChatStore((s) => s.sessionId);
-  const setSessionId = useChatStore((s) => s.setSessionId);
-  const setAgentId = useChatStore((s) => s.setAgentId);
-  const clearMessages = useChatStore((s) => s.clearMessages);
-  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
-  const hadSessionsRef = useRef(false);
+  const { user, logout } = useAuth()
+  const { data: sessions, isLoading } = useSessions()
+  const sessionId = useChatStore(s => s.sessionId)
+  const setSessionId = useChatStore(s => s.setSessionId)
+  const setAgentId = useChatStore(s => s.setAgentId)
+  const clearMessages = useChatStore(s => s.clearMessages)
+  const setSidebarOpen = useUIStore(s => s.setSidebarOpen)
+  const hadSessionsRef = useRef(false)
 
   // Multi-select state
-  const [selectMode, setSelectMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const batchDelete = useBatchDeleteSessions();
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const batchDelete = useBatchDeleteSessions()
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchExpanded, setSearchExpanded] = useState(false)
 
   // Pagination state
-  const [displayCount, setDisplayCount] = useState(SESSIONS_PAGE_SIZE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [displayCount, setDisplayCount] = useState(SESSIONS_PAGE_SIZE)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   // Reset selection and search when exiting select mode
   useEffect(() => {
     if (!selectMode) {
-      setSelectedIds(new Set());
-      setSearchQuery('');
-      setSearchExpanded(false);
+      setSelectedIds(new Set())
+      setSearchQuery("")
+      setSearchExpanded(false)
     }
-  }, [selectMode]);
+  }, [selectMode])
 
   // Track if we've ever had sessions
   useEffect(() => {
     if (sessions && sessions.length > 0) {
-      hadSessionsRef.current = true;
+      hadSessionsRef.current = true
     }
-  }, [sessions]);
+  }, [sessions])
 
   // NOTE: We previously had an effect here to clear state when all sessions are deleted.
   // This was removed because it caused race conditions:
@@ -80,104 +91,101 @@ export function SessionSidebar() {
   // Reset display count when sessions list changes (e.g., after deletion)
   useEffect(() => {
     if (sessions && sessions.length < displayCount) {
-      setDisplayCount(Math.max(SESSIONS_PAGE_SIZE, sessions.length));
+      setDisplayCount(Math.max(SESSIONS_PAGE_SIZE, sessions.length))
     }
-  }, [sessions, displayCount]);
+  }, [sessions, displayCount])
 
   // Filter sessions based on search query
   const { filteredSessions, totalCount, hasMore } = useMemo(() => {
-    if (!sessions) return { filteredSessions: [], totalCount: 0, hasMore: false };
+    if (!sessions) return { filteredSessions: [], totalCount: 0, hasMore: false }
 
-    let filtered = sessions;
+    let filtered = sessions
 
     // Apply search filter (search both name and first_message)
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((session) => {
-        const name = session.name || '';
-        const firstMessage = session.first_message || '';
-        return (
-          name.toLowerCase().includes(query) ||
-          firstMessage.toLowerCase().includes(query)
-        );
-      });
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(session => {
+        const name = session.name || ""
+        const firstMessage = session.first_message || ""
+        return name.toLowerCase().includes(query) || firstMessage.toLowerCase().includes(query)
+      })
     }
 
     // Apply pagination
-    const displayed = filtered.slice(0, displayCount);
+    const displayed = filtered.slice(0, displayCount)
 
     return {
       filteredSessions: displayed,
       totalCount: filtered.length,
       hasMore: filtered.length > displayCount,
-    };
-  }, [sessions, searchQuery, displayCount]);
+    }
+  }, [sessions, searchQuery, displayCount])
 
   // Handle "Select All" / "Deselect All"
   const handleSelectAll = useCallback(() => {
-    if (filteredSessions.length === 0) return;
+    if (filteredSessions.length === 0) return
 
-    const allSelected = filteredSessions.every((session) => selectedIds.has(session.session_id));
+    const allSelected = filteredSessions.every(session => selectedIds.has(session.session_id))
 
     if (allSelected) {
       // Deselect all filtered sessions
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredSessions.forEach((session) => next.delete(session.session_id));
-        return next;
-      });
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filteredSessions.forEach(session => next.delete(session.session_id))
+        return next
+      })
     } else {
       // Select all filtered sessions
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        filteredSessions.forEach((session) => next.add(session.session_id));
-        return next;
-      });
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filteredSessions.forEach(session => next.add(session.session_id))
+        return next
+      })
     }
-  }, [filteredSessions, selectedIds]);
+  }, [filteredSessions, selectedIds])
 
   // Handle "Load more" button click
   const handleLoadMore = useCallback(() => {
-    setIsLoadingMore(true);
+    setIsLoadingMore(true)
     // Simulate a small delay for smoother UX
     setTimeout(() => {
-      setDisplayCount((prev) => prev + SESSIONS_PAGE_SIZE);
-      setIsLoadingMore(false);
-    }, 150);
-  }, []);
+      setDisplayCount(prev => prev + SESSIONS_PAGE_SIZE)
+      setIsLoadingMore(false)
+    }, 150)
+  }, [])
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
+    setSelectedIds(prev => {
+      const next = new Set(prev)
       if (next.has(id)) {
-        next.delete(id);
+        next.delete(id)
       } else {
-        next.add(id);
+        next.add(id)
       }
-      return next;
-    });
-  };
+      return next
+    })
+  }
 
   const handleBatchDelete = async () => {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0) return
 
-    if (confirm(`Delete ${selectedIds.size} conversation${selectedIds.size > 1 ? 's' : ''}?`)) {
+    if (confirm(`Delete ${selectedIds.size} conversation${selectedIds.size > 1 ? "s" : ""}?`)) {
       try {
-        await batchDelete.mutateAsync(Array.from(selectedIds));
+        await batchDelete.mutateAsync(Array.from(selectedIds))
 
         // If we deleted the current session, clear state
         if (sessionId && selectedIds.has(sessionId)) {
-          setSessionId(null);
-          setAgentId(null);
-          clearMessages();
+          setSessionId(null)
+          setAgentId(null)
+          clearMessages()
         }
 
-        setSelectMode(false);
+        setSelectMode(false)
       } catch (error) {
-        console.error('Batch delete failed:', error);
+        console.error("Batch delete failed:", error)
       }
     }
-  };
+  }
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -188,7 +196,12 @@ export function SessionSidebar() {
           </div>
           <h1 className="text-sm font-semibold whitespace-nowrap">Claude Agent SDK</h1>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setSidebarOpen(false)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => setSidebarOpen(false)}
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -205,7 +218,7 @@ export function SessionSidebar() {
               onClick={() => setSearchExpanded(!searchExpanded)}
               title="Search conversations"
             >
-              <Search className={`h-3.5 w-3.5 ${searchExpanded ? 'text-primary' : ''}`} />
+              <Search className={`h-3.5 w-3.5 ${searchExpanded ? "text-primary" : ""}`} />
             </Button>
             <Button
               variant="ghost"
@@ -214,7 +227,7 @@ export function SessionSidebar() {
               onClick={() => setSelectMode(!selectMode)}
               title={selectMode ? "Cancel selection" : "Select sessions"}
             >
-              <CheckSquare className={`h-3.5 w-3.5 ${selectMode ? 'text-primary' : ''}`} />
+              <CheckSquare className={`h-3.5 w-3.5 ${selectMode ? "text-primary" : ""}`} />
             </Button>
           </div>
         )}
@@ -230,7 +243,7 @@ export function SessionSidebar() {
                 type="text"
                 placeholder="Search name & first message..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="h-7 pl-8 text-xs pr-8"
                 autoFocus
               />
@@ -239,7 +252,7 @@ export function SessionSidebar() {
                   variant="ghost"
                   size="icon"
                   className="absolute right-0.5 top-1/2 -translate-y-1/2 h-6 w-6"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setSearchQuery("")}
                   title="Clear search"
                 >
                   <X className="h-3 w-3" />
@@ -251,8 +264,8 @@ export function SessionSidebar() {
               size="icon"
               className="h-7 w-7 shrink-0"
               onClick={() => {
-                setSearchQuery('');
-                setSearchExpanded(false);
+                setSearchQuery("")
+                setSearchExpanded(false)
               }}
               title="Close search"
             >
@@ -279,7 +292,9 @@ export function SessionSidebar() {
               </Button>
             )}
             <span className="text-xs text-muted-foreground">
-              {selectedIds.size > 0 ? `${selectedIds.size} of ${filteredSessions.length} selected` : `${filteredSessions.length} conversations`}
+              {selectedIds.size > 0
+                ? `${selectedIds.size} of ${filteredSessions.length} selected`
+                : `${filteredSessions.length} conversations`}
             </span>
           </div>
           <Button
@@ -287,9 +302,13 @@ export function SessionSidebar() {
             size="sm"
             className="h-6 text-xs px-2"
             onClick={handleSelectAll}
-            title={filteredSessions.every((s) => selectedIds.has(s.session_id)) ? "Deselect all filtered" : "Select all filtered"}
+            title={
+              filteredSessions.every(s => selectedIds.has(s.session_id))
+                ? "Deselect all filtered"
+                : "Select all filtered"
+            }
           >
-            {filteredSessions.every((s) => selectedIds.has(s.session_id)) ? (
+            {filteredSessions.every(s => selectedIds.has(s.session_id)) ? (
               <>
                 <Check className="h-3 w-3 mr-1" />
                 Deselect All
@@ -321,7 +340,7 @@ export function SessionSidebar() {
                 </div>
               )}
 
-              {filteredSessions.map((session) => (
+              {filteredSessions.map(session => (
                 <MemoizedSessionItem
                   key={session.session_id}
                   session={session}
@@ -349,8 +368,8 @@ export function SessionSidebar() {
                       </>
                     ) : (
                       <>
-                        <ChevronDown className="h-3 w-3 mr-1.5" />
-                        +{totalCount - filteredSessions.length} more
+                        <ChevronDown className="h-3 w-3 mr-1.5" />+
+                        {totalCount - filteredSessions.length} more
                       </>
                     )}
                   </Button>
@@ -359,7 +378,7 @@ export function SessionSidebar() {
             </>
           ) : (
             <p className="px-1 text-xs text-muted-foreground">
-              {searchQuery ? 'No matching conversations' : 'No conversations yet'}
+              {searchQuery ? "No matching conversations" : "No conversations yet"}
             </p>
           )}
         </div>
@@ -392,5 +411,5 @@ export function SessionSidebar() {
         </div>
       )}
     </div>
-  );
+  )
 }

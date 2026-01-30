@@ -1,2 +1,2 @@
-export { DashboardLayout } from './dashboard-layout';
-export { AppSidebar } from './app-sidebar';
+export { AppSidebar } from "./app-sidebar"
+export { DashboardLayout } from "./dashboard-layout"

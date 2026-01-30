@@ -1,2 +1,2 @@
-export { AgentGrid } from './agent-grid';
-export { AgentSwitcher } from './agent-switcher';
+export { AgentGrid } from "./agent-grid"
+export { AgentSwitcher } from "./agent-switcher"

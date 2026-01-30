@@ -1,13 +1,8 @@
-'use client';
+"use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react';
-import { useAuth } from '@/components/providers/auth-provider';
-import {
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  useSidebar,
-} from '@/components/ui/sidebar';
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Sparkles } from "lucide-react"
+import { useAuth } from "@/components/providers/auth-provider"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,17 +11,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/dropdown-menu"
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar"
 
 export function SidebarUserNav() {
-  const { isMobile } = useSidebar();
-  const { user, logout } = useAuth();
+  const { isMobile } = useSidebar()
+  const { user, logout } = useAuth()
 
-  if (!user) return null;
+  if (!user) return null
 
-  const userInitial = user.full_name?.[0] || user.username[0];
-  const displayName = user.full_name || user.username;
+  const userInitial = user.full_name?.[0] || user.username[0]
+  const displayName = user.full_name || user.username
 
   return (
     <SidebarMenu>
@@ -51,7 +51,7 @@ export function SidebarUserNav() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
+            side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
@@ -95,5 +95,5 @@ export function SidebarUserNav() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
+  )
 }

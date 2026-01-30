@@ -1,10 +1,10 @@
-'use client';
-import type { ChatMessage } from '@/types';
-import { formatTime } from '@/lib/utils';
-import { User } from 'lucide-react';
+"use client"
+import { User } from "lucide-react"
+import { formatTime } from "@/lib/utils"
+import type { ChatMessage } from "@/types"
 
 interface UserMessageProps {
-  message: ChatMessage;
+  message: ChatMessage
 }
 
 export function UserMessage({ message }: UserMessageProps) {
@@ -12,7 +12,9 @@ export function UserMessage({ message }: UserMessageProps) {
     <div className="group flex justify-end gap-2 sm:gap-3 py-2 px-2 sm:px-4">
       <div className="max-w-[85%] space-y-1">
         <div className="rounded-lg bg-userMessage px-4 py-2.5 text-userMessageForeground shadow-sm">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+            {message.content}
+          </p>
         </div>
         <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
           <span className="text-[11px] text-muted-foreground">{formatTime(message.timestamp)}</span>
@@ -22,5 +24,5 @@ export function UserMessage({ message }: UserMessageProps) {
         <User className="h-4 w-4 text-userMessageForeground" />
       </div>
     </div>
-  );
+  )
 }

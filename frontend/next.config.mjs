@@ -4,8 +4,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'claude-agent-sdk-fastapi-sg4.tt-ai.org',
+        protocol: "https",
+        hostname: "claude-agent-sdk-fastapi-sg4.tt-ai.org",
       },
     ],
   },
@@ -17,10 +17,10 @@ const nextConfig = {
   },
 
   // Output configuration
-  output: 'standalone',
+  output: "standalone",
 
   // React strict mode for better development experience
   reactStrictMode: true,
-};
+}
 
-export default nextConfig;
+export default nextConfig

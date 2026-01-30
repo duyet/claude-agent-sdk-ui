@@ -10,5 +10,5 @@ export function TypingIndicator() {
         <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
       </div>
     </div>
-  );
+  )
 }

@@ -1,15 +1,15 @@
-'use client';
+"use client"
 
-import { Loader2, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export type ToolStatus = 'running' | 'completed' | 'error' | 'pending';
+export type ToolStatus = "running" | "completed" | "error" | "pending"
 
 interface ToolStatusBadgeProps {
-  status: ToolStatus;
-  duration?: number; // in milliseconds
-  showLabel?: boolean;
-  className?: string;
+  status: ToolStatus
+  duration?: number // in milliseconds
+  showLabel?: boolean
+  className?: string
 }
 
 /**
@@ -22,68 +22,60 @@ export function ToolStatusBadge({
   className,
 }: ToolStatusBadgeProps) {
   const formatDuration = (ms: number): string => {
-    if (ms < 1000) return `${ms}ms`;
-    const seconds = Math.round(ms / 100) / 10;
-    return `${seconds}s`;
-  };
+    if (ms < 1000) return `${ms}ms`
+    const seconds = Math.round(ms / 100) / 10
+    return `${seconds}s`
+  }
 
   const statusConfig = {
     running: {
       icon: <Loader2 className="h-4 w-4 animate-spin" />,
-      label: 'Running',
-      className: 'text-blue-500 animate-pulse',
+      label: "Running",
+      className: "text-blue-500 animate-pulse",
     },
     completed: {
       icon: <CheckCircle2 className="h-4 w-4" />,
-      label: duration ? formatDuration(duration) : 'Done',
-      className: 'text-green-500',
+      label: duration ? formatDuration(duration) : "Done",
+      className: "text-green-500",
     },
     error: {
       icon: <AlertCircle className="h-4 w-4" />,
-      label: 'Error',
-      className: 'text-destructive',
+      label: "Error",
+      className: "text-destructive",
     },
     pending: {
       icon: <Clock className="h-3.5 w-3.5 animate-pulse" />,
-      label: 'Pending',
-      className: 'text-amber-500 animate-pulse',
+      label: "Pending",
+      className: "text-amber-500 animate-pulse",
     },
-  };
+  }
 
-  const config = statusConfig[status];
+  const config = statusConfig[status]
 
   return (
-    <span className={cn('flex items-center gap-1 shrink-0', config.className, className)}>
+    <span className={cn("flex items-center gap-1 shrink-0", config.className, className)}>
       {config.icon}
-      {showLabel && (
-        <span className="text-[10px] font-medium">{config.label}</span>
-      )}
+      {showLabel && <span className="text-[10px] font-medium">{config.label}</span>}
     </span>
-  );
+  )
 }
 
 /**
  * Compact status indicator (icon only, useful for collapsed states)
  */
-export function ToolStatusIcon({
-  status,
-  className,
-}: {
-  status: ToolStatus;
-  className?: string;
-}) {
-  return <ToolStatusBadge status={status} showLabel={false} className={className} />;
+export function ToolStatusIcon({ status, className }: { status: ToolStatus; className?: string }) {
+  return <ToolStatusBadge status={status} showLabel={false} className={className} />
 }
 
 /**
  * Animated running indicator with pulsing dot
  */
 export function RunningIndicator({
-  label = 'Running',
-  color = 'hsl(var(--foreground))',
+  label = "Running",
+  color = "hsl(var(--foreground))",
 }: {
-  label?: string;
-  color?: string;
+  label?: string
+  color?: string
 }) {
   return (
     <span className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -99,5 +91,5 @@ export function RunningIndicator({
       </span>
       <span className="text-[11px]">{label}</span>
     </span>
-  );
+  )
 }

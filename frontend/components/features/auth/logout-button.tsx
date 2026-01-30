@@ -1,46 +1,46 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { LogOut, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Loader2, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface LogoutButtonProps {
-  className?: string;
-  variant?: 'default' | 'ghost' | 'outline' | 'destructive';
-  showIcon?: boolean;
-  showText?: boolean;
+  className?: string
+  variant?: "default" | "ghost" | "outline" | "destructive"
+  showIcon?: boolean
+  showText?: boolean
 }
 
 export function LogoutButton({
   className,
-  variant = 'ghost',
+  variant = "ghost",
   showIcon = true,
   showText = true,
 }: LogoutButtonProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleLogout = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
-      router.refresh();
+      await fetch("/api/auth/logout", { method: "POST" })
+      router.push("/login")
+      router.refresh()
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <Button
       variant={variant}
       onClick={handleLogout}
       disabled={isLoading}
-      className={cn('gap-2', className)}
+      className={cn("gap-2", className)}
     >
       {isLoading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -49,5 +49,5 @@ export function LogoutButton({
       ) : null}
       {showText && <span>Logout</span>}
     </Button>
-  );
+  )
 }

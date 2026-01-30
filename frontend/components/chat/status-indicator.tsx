@@ -1,39 +1,39 @@
-'use client';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import type { ConnectionStatus } from '@/types';
+"use client"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import type { ConnectionStatus } from "@/types"
 
 interface StatusIndicatorProps {
-  status: ConnectionStatus;
-  compact?: boolean;
+  status: ConnectionStatus
+  compact?: boolean
 }
 
 export function StatusIndicator({ status, compact = false }: StatusIndicatorProps) {
   const getStatusColor = () => {
     switch (status) {
-      case 'connected':
-        return 'bg-green-500';
-      case 'connecting':
-        return 'bg-yellow-500 animate-pulse';
-      case 'error':
-        return 'bg-red-500';
+      case "connected":
+        return "bg-green-500"
+      case "connecting":
+        return "bg-yellow-500 animate-pulse"
+      case "error":
+        return "bg-red-500"
       default:
-        return 'bg-muted-foreground';
+        return "bg-muted-foreground"
     }
-  };
+  }
 
   const getStatusText = () => {
     switch (status) {
-      case 'connected':
-        return 'Connected';
-      case 'connecting':
-        return 'Connecting...';
-      case 'error':
-        return 'Error';
+      case "connected":
+        return "Connected"
+      case "connecting":
+        return "Connecting..."
+      case "error":
+        return "Error"
       default:
-        return 'Disconnected';
+        return "Disconnected"
     }
-  };
+  }
 
   // Compact mode: just the colored dot with tooltip
   if (compact) {
@@ -46,7 +46,7 @@ export function StatusIndicator({ status, compact = false }: StatusIndicatorProp
           <p>{getStatusText()}</p>
         </TooltipContent>
       </Tooltip>
-    );
+    )
   }
 
   // Full mode: badge with dot and text
@@ -55,5 +55,5 @@ export function StatusIndicator({ status, compact = false }: StatusIndicatorProp
       <span className={`h-2 w-2 rounded-full ${getStatusColor()}`} />
       <span className="hidden sm:inline">{getStatusText()}</span>
     </Badge>
-  );
+  )
 }

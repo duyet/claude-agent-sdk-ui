@@ -1,152 +1,157 @@
-'use client';
+"use client"
 
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { Check, Copy, ChevronRight, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { Check, ChevronDown, ChevronRight, Copy } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { cn } from "@/lib/utils"
 
 interface CodeBlockProps {
-  code: string;
-  language?: string;
-  showLineNumbers?: boolean;
-  defaultExpanded?: boolean;
+  code: string
+  language?: string
+  showLineNumbers?: boolean
+  defaultExpanded?: boolean
 }
 
 // Map common language aliases
 const languageMap: Record<string, string> = {
-  js: 'javascript',
-  ts: 'typescript',
-  py: 'python',
-  sh: 'bash',
-  shell: 'bash',
-  yml: 'yaml',
-  md: 'markdown',
-};
+  js: "javascript",
+  ts: "typescript",
+  py: "python",
+  sh: "bash",
+  shell: "bash",
+  yml: "yaml",
+  md: "markdown",
+}
 
 // Custom theme using CSS variables for theme-aware syntax highlighting
 const customTheme: { [key: string]: React.CSSProperties } = {
   'code[class*="language-"]': {
-    color: 'hsl(var(--codeblock-text))',
+    color: "hsl(var(--codeblock-text))",
     fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-    fontSize: '13px',
-    lineHeight: '1.6',
-    whiteSpace: 'pre',
-    wordSpacing: 'normal',
-    wordBreak: 'normal',
+    fontSize: "13px",
+    lineHeight: "1.6",
+    whiteSpace: "pre",
+    wordSpacing: "normal",
+    wordBreak: "normal",
     tabSize: 2,
   },
   'pre[class*="language-"]': {
-    color: 'hsl(var(--codeblock-text))',
+    color: "hsl(var(--codeblock-text))",
     fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-    fontSize: '13px',
-    lineHeight: '1.6',
-    whiteSpace: 'pre',
-    wordSpacing: 'normal',
-    wordBreak: 'normal',
+    fontSize: "13px",
+    lineHeight: "1.6",
+    whiteSpace: "pre",
+    wordSpacing: "normal",
+    wordBreak: "normal",
     tabSize: 2,
     margin: 0,
-    padding: '12px',
-    overflow: 'auto',
-    background: 'transparent',
+    padding: "12px",
+    overflow: "auto",
+    background: "transparent",
   },
-  'comment': { color: 'hsl(var(--syntax-comment))' },
-  'prolog': { color: 'hsl(var(--syntax-comment))' },
-  'doctype': { color: 'hsl(var(--syntax-comment))' },
-  'cdata': { color: 'hsl(var(--syntax-comment))' },
-  'punctuation': { color: 'hsl(var(--syntax-operator))' },
-  'property': { color: 'hsl(var(--syntax-variable))' },
-  'tag': { color: 'hsl(var(--syntax-keyword))' },
-  'boolean': { color: 'hsl(var(--syntax-keyword))' },
-  'number': { color: 'hsl(var(--syntax-number))' },
-  'constant': { color: 'hsl(var(--syntax-builtin))' },
-  'symbol': { color: 'hsl(var(--syntax-number))' },
-  'deleted': { color: 'hsl(var(--status-error))' },
-  'selector': { color: 'hsl(var(--syntax-function))' },
-  'attr-name': { color: 'hsl(var(--syntax-variable))' },
-  'string': { color: 'hsl(var(--syntax-string))' },
-  'char': { color: 'hsl(var(--syntax-string))' },
-  'builtin': { color: 'hsl(var(--syntax-builtin))' },
-  'inserted': { color: 'hsl(var(--syntax-number))' },
-  'operator': { color: 'hsl(var(--syntax-operator))' },
-  'entity': { color: 'hsl(var(--syntax-keyword))' },
-  'url': { color: 'hsl(var(--syntax-builtin))' },
-  'variable': { color: 'hsl(var(--syntax-variable))' },
-  'atrule': { color: 'hsl(var(--syntax-keyword))' },
-  'attr-value': { color: 'hsl(var(--syntax-string))' },
-  'function': { color: 'hsl(var(--syntax-function))' },
-  'keyword': { color: 'hsl(var(--syntax-keyword))' },
-  'regex': { color: 'hsl(var(--syntax-string))' },
-  'important': { color: 'hsl(var(--syntax-keyword))', fontWeight: 'bold' },
-  'bold': { fontWeight: 'bold' },
-  'italic': { fontStyle: 'italic' },
-  'class-name': { color: 'hsl(var(--syntax-builtin))' },
-  'parameter': { color: 'hsl(var(--syntax-variable))' },
-  'interpolation': { color: 'hsl(var(--syntax-variable))' },
-  'punctuation.interpolation-punctuation': { color: 'hsl(var(--syntax-keyword))' },
-  'template-string': { color: 'hsl(var(--syntax-string))' },
-  'property-access': { color: 'hsl(var(--syntax-variable))' },
-  'imports': { color: 'hsl(var(--syntax-variable))' },
-  'module': { color: 'hsl(var(--syntax-string))' },
-  'script': { color: 'hsl(var(--codeblock-text))' },
-  'language-javascript': { color: 'hsl(var(--codeblock-text))' },
-  'plain': { color: 'hsl(var(--codeblock-text))' },
-  'plain-text': { color: 'hsl(var(--codeblock-text))' },
-};
+  comment: { color: "hsl(var(--syntax-comment))" },
+  prolog: { color: "hsl(var(--syntax-comment))" },
+  doctype: { color: "hsl(var(--syntax-comment))" },
+  cdata: { color: "hsl(var(--syntax-comment))" },
+  punctuation: { color: "hsl(var(--syntax-operator))" },
+  property: { color: "hsl(var(--syntax-variable))" },
+  tag: { color: "hsl(var(--syntax-keyword))" },
+  boolean: { color: "hsl(var(--syntax-keyword))" },
+  number: { color: "hsl(var(--syntax-number))" },
+  constant: { color: "hsl(var(--syntax-builtin))" },
+  symbol: { color: "hsl(var(--syntax-number))" },
+  deleted: { color: "hsl(var(--status-error))" },
+  selector: { color: "hsl(var(--syntax-function))" },
+  "attr-name": { color: "hsl(var(--syntax-variable))" },
+  string: { color: "hsl(var(--syntax-string))" },
+  char: { color: "hsl(var(--syntax-string))" },
+  builtin: { color: "hsl(var(--syntax-builtin))" },
+  inserted: { color: "hsl(var(--syntax-number))" },
+  operator: { color: "hsl(var(--syntax-operator))" },
+  entity: { color: "hsl(var(--syntax-keyword))" },
+  url: { color: "hsl(var(--syntax-builtin))" },
+  variable: { color: "hsl(var(--syntax-variable))" },
+  atrule: { color: "hsl(var(--syntax-keyword))" },
+  "attr-value": { color: "hsl(var(--syntax-string))" },
+  function: { color: "hsl(var(--syntax-function))" },
+  keyword: { color: "hsl(var(--syntax-keyword))" },
+  regex: { color: "hsl(var(--syntax-string))" },
+  important: { color: "hsl(var(--syntax-keyword))", fontWeight: "bold" },
+  bold: { fontWeight: "bold" },
+  italic: { fontStyle: "italic" },
+  "class-name": { color: "hsl(var(--syntax-builtin))" },
+  parameter: { color: "hsl(var(--syntax-variable))" },
+  interpolation: { color: "hsl(var(--syntax-variable))" },
+  "punctuation.interpolation-punctuation": { color: "hsl(var(--syntax-keyword))" },
+  "template-string": { color: "hsl(var(--syntax-string))" },
+  "property-access": { color: "hsl(var(--syntax-variable))" },
+  imports: { color: "hsl(var(--syntax-variable))" },
+  module: { color: "hsl(var(--syntax-string))" },
+  script: { color: "hsl(var(--codeblock-text))" },
+  "language-javascript": { color: "hsl(var(--codeblock-text))" },
+  plain: { color: "hsl(var(--codeblock-text))" },
+  "plain-text": { color: "hsl(var(--codeblock-text))" },
+}
 
-export function CodeBlock({ code, language = 'text', showLineNumbers = false, defaultExpanded = true }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
-  const [expanded, setExpanded] = useState(defaultExpanded);
-  const announcementTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+export function CodeBlock({
+  code,
+  language = "text",
+  showLineNumbers = false,
+  defaultExpanded = true,
+}: CodeBlockProps) {
+  const [copied, setCopied] = useState(false)
+  const [expanded, setExpanded] = useState(defaultExpanded)
+  const announcementTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const cleanCode = typeof code === 'string' ? code : String(code || '');
-  const lines = useMemo(() => cleanCode.split('\n'), [cleanCode]);
-  const lineCount = lines.length;
+  const cleanCode = typeof code === "string" ? code : String(code || "")
+  const lines = useMemo(() => cleanCode.split("\n"), [cleanCode])
+  const lineCount = lines.length
 
   // Normalize language
-  const normalizedLang = languageMap[language.toLowerCase()] || language.toLowerCase();
+  const normalizedLang = languageMap[language.toLowerCase()] || language.toLowerCase()
 
   // Auto-collapse long code blocks
   useEffect(() => {
     if (lineCount > 15) {
-      setExpanded(false);
+      setExpanded(false)
     }
-  }, [lineCount]);
+  }, [lineCount])
 
   useEffect(() => {
     return () => {
       if (announcementTimeoutRef.current) {
-        clearTimeout(announcementTimeoutRef.current);
+        clearTimeout(announcementTimeoutRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     try {
-      await navigator.clipboard.writeText(cleanCode);
-      setCopied(true);
-      announcementTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(cleanCode)
+      setCopied(true)
+      announcementTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error("Failed to copy:", err)
     }
-  };
-
-  if (!cleanCode || cleanCode.trim() === '') {
-    return null;
   }
 
-  const previewCode = lines.slice(0, 4).join('\n');
-  const hasMoreLines = lineCount > 4;
+  if (!cleanCode || cleanCode.trim() === "") {
+    return null
+  }
+
+  const previewCode = lines.slice(0, 4).join("\n")
+  const hasMoreLines = lineCount > 4
 
   // Custom style overrides
   const customStyle: React.CSSProperties = {
     margin: 0,
-    padding: '12px',
-    fontSize: '13px',
-    lineHeight: '1.6',
+    padding: "12px",
+    fontSize: "13px",
+    lineHeight: "1.6",
     borderRadius: 0,
-    background: 'transparent',
-  };
+    background: "transparent",
+  }
 
   return (
     <div className="my-3 rounded-md border border-border overflow-hidden border-l-2 border-l-primary">
@@ -161,7 +166,7 @@ export function CodeBlock({ code, language = 'text', showLineNumbers = false, de
           ) : (
             <ChevronRight className="h-4 w-4 text-codeblock-muted" />
           )}
-          <span className="font-medium text-codeblock-text">{language || 'code'}</span>
+          <span className="font-medium text-codeblock-text">{language || "code"}</span>
           <span className="text-codeblock-muted text-xs">• {lineCount} lines</span>
         </div>
 
@@ -169,13 +174,11 @@ export function CodeBlock({ code, language = 'text', showLineNumbers = false, de
           onClick={handleCopy}
           className={cn(
             "flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-colors",
-            copied
-              ? "text-status-success"
-              : "text-codeblock-muted hover:text-codeblock-text"
+            copied ? "text-status-success" : "text-codeblock-muted hover:text-codeblock-text",
           )}
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          <span>{copied ? 'Copied!' : 'Copy'}</span>
+          <span>{copied ? "Copied!" : "Copy"}</span>
         </button>
       </div>
 
@@ -216,5 +219,5 @@ export function CodeBlock({ code, language = 'text', showLineNumbers = false, de
         )}
       </div>
     </div>
-  );
+  )
 }
