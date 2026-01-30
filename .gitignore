@@ -133,3 +133,4 @@ tsconfig.tsbuildinfo
 *.db
 *.sqlite
 *.sqlite3
+CLAUDE.local.md
