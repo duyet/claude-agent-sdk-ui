@@ -90,9 +90,14 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
                     .join("")
                 } else if (children && typeof children === "object") {
                   if ("value" in children) {
-                    codeContent = String((children as any).value || "")
-                  } else if ("props" in children && (children as any).props?.children) {
-                    codeContent = String((children as any).props.children)
+                    codeContent = String((children as { value: unknown }).value || "")
+                  } else if (
+                    "props" in children &&
+                    (children as { props?: { children?: unknown } }).props?.children
+                  ) {
+                    codeContent = String(
+                      (children as { props: { children: unknown } }).props.children,
+                    )
                   } else {
                     codeContent = JSON.stringify(children)
                   }
@@ -133,7 +138,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
                 const hasBlocks =
                   Array.isArray(children) &&
                   children.some(
-                    (child: any) =>
+                    (child: { type?: string; tagName?: string }) =>
                       child?.type === "element" &&
                       ["pre", "div", "blockquote", "ul", "ol", "table", "img"].includes(
                         child?.tagName,

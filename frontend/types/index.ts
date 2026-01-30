@@ -20,7 +20,7 @@ export interface ChatMessage {
   content: string
   timestamp: Date
   toolName?: string
-  toolInput?: Record<string, any>
+  toolInput?: Record<string, unknown>
   toolUseId?: string
   isError?: boolean
 }

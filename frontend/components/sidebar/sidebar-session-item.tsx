@@ -120,14 +120,30 @@ export function SidebarSessionItem({
     setIsEditing(true)
   }
 
-  const handleCancelEdit = (e: React.MouseEvent) => {
+  const handleCancelEditClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsEditing(false)
     setEditName("")
   }
 
-  const handleSaveEdit = async (e: React.MouseEvent) => {
+  const handleCancelEditKey = () => {
+    setIsEditing(false)
+    setEditName("")
+  }
+
+  const handleSaveEditClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    const newName = editName.trim() || null
+
+    try {
+      await updateSession.mutateAsync({ id: session.session_id, name: newName })
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Failed to update session name:", error)
+    }
+  }
+
+  const handleSaveEditKey = async () => {
     const newName = editName.trim() || null
 
     try {
@@ -142,9 +158,9 @@ export function SidebarSessionItem({
     if (isEditing) {
       e.stopPropagation()
       if (e.key === "Enter") {
-        handleSaveEdit(e as any)
+        handleSaveEditKey()
       } else if (e.key === "Escape") {
-        handleCancelEdit(e as any)
+        handleCancelEditKey()
       }
     }
   }
@@ -165,7 +181,7 @@ export function SidebarSessionItem({
             variant="ghost"
             size="icon"
             className="size-6 shrink-0"
-            onClick={handleSaveEdit}
+            onClick={handleSaveEditClick}
             disabled={updateSession.isPending}
           >
             <Check className="size-3 text-green-600" />
@@ -174,7 +190,7 @@ export function SidebarSessionItem({
             variant="ghost"
             size="icon"
             className="size-6 shrink-0"
-            onClick={handleCancelEdit}
+            onClick={handleCancelEditClick}
           >
             <X className="size-3 text-red-600" />
           </Button>

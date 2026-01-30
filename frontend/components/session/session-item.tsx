@@ -136,14 +136,30 @@ export function SessionItem({
     setIsEditing(true)
   }
 
-  const handleCancelEdit = (e: React.MouseEvent) => {
+  const handleCancelEditClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsEditing(false)
     setEditName("")
   }
 
-  const handleSaveEdit = async (e: React.MouseEvent) => {
+  const handleCancelEditKey = () => {
+    setIsEditing(false)
+    setEditName("")
+  }
+
+  const handleSaveEditClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    const newName = editName.trim() || null // Empty string becomes null
+
+    try {
+      await updateSession.mutateAsync({ id: session.session_id, name: newName })
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Failed to update session name:", error)
+    }
+  }
+
+  const handleSaveEditKey = async () => {
     const newName = editName.trim() || null // Empty string becomes null
 
     try {
@@ -158,9 +174,9 @@ export function SessionItem({
     if (isEditing) {
       e.stopPropagation()
       if (e.key === "Enter") {
-        handleSaveEdit(e as any)
+        handleSaveEditKey()
       } else if (e.key === "Escape") {
-        handleCancelEdit(e as any)
+        handleCancelEditKey()
       }
       return
     }
@@ -226,7 +242,7 @@ export function SessionItem({
               variant="ghost"
               size="icon"
               className="h-6 w-6 shrink-0"
-              onClick={handleSaveEdit}
+              onClick={handleSaveEditClick}
               disabled={updateSession.isPending}
             >
               <Check className="h-3 w-3 text-status-success-fg" />
@@ -235,7 +251,7 @@ export function SessionItem({
               variant="ghost"
               size="icon"
               className="h-6 w-6 shrink-0"
-              onClick={handleCancelEdit}
+              onClick={handleCancelEditClick}
             >
               <X className="h-3 w-3 text-status-error-fg" />
             </Button>

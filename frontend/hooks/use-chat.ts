@@ -12,6 +12,7 @@ import { useQuestionStore } from "@/lib/store/question-store"
 import type {
   AskUserQuestionEvent,
   ChatMessage,
+  ConnectionStatus,
   PlanApprovalEvent,
   UIQuestion,
   WebSocketEvent,
@@ -140,7 +141,7 @@ export function useChat() {
 
         case "text_delta": {
           // Filter out tool reference patterns like [Tool: Bash (ID: call_...)] Input: {...}
-          const toolRefPattern = /\[Tool: [^]]+\] Input:\s*(?:\{[^}]*\}|\[.*?\]|"[^"]*")\s*/g
+          const toolRefPattern = /\[Tool: [^\]]+\] Input:\s*(?:\{[^}]*\}|\[.*?\]|"[^"]*")\s*/g
           const filteredText = event.text.replace(toolRefPattern, "")
 
           // Create assistant message on first text delta if it doesn't exist
@@ -351,7 +352,7 @@ export function useChat() {
               useChatStore.getState().setAgentId(message.state.agentId)
             }
             if (message.state.connectionStatus !== ws.status) {
-              setConnectionStatus(message.state.connectionStatus as any)
+              setConnectionStatus(message.state.connectionStatus as ConnectionStatus)
             }
             // Note: We don't sync messages to avoid conflicts
             // Messages are synced via the new-message event type

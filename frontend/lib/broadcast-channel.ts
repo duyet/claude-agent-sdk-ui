@@ -13,12 +13,12 @@ export interface TabMessage {
   // For leader-election
   isLeader?: boolean
   // For new-message
-  message?: any
+  message?: unknown
   // For sync-state
   state?: {
     sessionId: string | null
     agentId: string | null
-    messages: any[]
+    messages: unknown[]
     connectionStatus: string
   }
 }
@@ -198,7 +198,7 @@ export class TabBroadcastChannel {
   /**
    * Send a new message to all tabs (called by leader when receiving from WebSocket)
    */
-  broadcastMessage(message: any): void {
+  broadcastMessage(message: unknown): void {
     this.broadcast({
       type: "new-message",
       tabId: this.tabId,
