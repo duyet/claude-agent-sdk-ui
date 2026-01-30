@@ -8,15 +8,9 @@ interface SidebarSearchProps {
   searchQuery: string
   setSearchQuery: (query: string) => void
   expanded: boolean
-  setExpanded: (expanded: boolean) => void
 }
 
-export function SidebarSearch({
-  searchQuery,
-  setSearchQuery,
-  expanded,
-  setExpanded,
-}: SidebarSearchProps) {
+export function SidebarSearch({ searchQuery, setSearchQuery, expanded }: SidebarSearchProps) {
   if (!expanded) {
     return null
   }

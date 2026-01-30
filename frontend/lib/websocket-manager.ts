@@ -150,8 +150,6 @@ export class WebSocketManager {
     this.isAuthenticated = false // Reset authentication state
     this._messageBuffer = [] // Clear message buffer
 
-    const wsUrl = new URL(WS_URL)
-
     // Get JWT token for WebSocket authentication (will be sent after connection)
     let accessToken = await tokenService.getAccessToken()
     if (!accessToken) {
@@ -172,6 +170,11 @@ export class WebSocketManager {
       }
     }
 
+    // At this point, accessToken is guaranteed to be a string
+    const tokenToSend: string = accessToken
+
+    const wsUrl = new URL(WS_URL)
+
     // Note: Token is NOT added to query string for security
     // It will be sent via message after connection established
     console.log("JWT token obtained for post-connect authentication")
@@ -188,10 +191,6 @@ export class WebSocketManager {
 
     // Capture current connectionId for this connection's handlers
     const currentConnectionId = this.connectionId
-
-    // Capture the token for use in the onopen callback
-    // We've already validated that accessToken is not null above
-    const tokenToSend = accessToken!
 
     this.ws.onopen = () => {
       console.log("WebSocket connected successfully, authenticating...")

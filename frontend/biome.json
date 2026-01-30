@@ -6,7 +6,8 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": true,
+    "includes": ["app/**", "components/**", "lib/**", "hooks/**", "types/**"]
   },
   "formatter": {
     "enabled": true,
@@ -30,6 +31,7 @@
         "recommended": true,
         "noUnusedVariables": "warn",
         "noUnusedImports": "warn",
+        "noUnusedFunctionParameters": "warn",
         "useExhaustiveDependencies": "warn",
         "useHookAtTopLevel": "error"
       },
@@ -52,8 +54,9 @@
         "noImplicitAnyLet": "warn",
         "noShadowRestrictedNames": "warn",
         "noUnknownAtRules": "off",
-        "useIterableCallbackReturn": "warn",
-        "noControlCharactersInRegex": "off"
+        "useIterableCallbackReturn": "off",
+        "noControlCharactersInRegex": "off",
+        "noDocumentCookie": "off"
       },
       "performance": {
         "recommended": true

@@ -266,7 +266,7 @@ function getConnectionErrorMessage(): string {
 const MAX_HISTORY_RETRIES = 3
 
 function ChatContainerInner() {
-  const { sendMessage, sendAnswer, sendPlanApproval, status } = useChat()
+  const { sendMessage, sendAnswer, sendPlanApproval } = useChat()
   const connectionStatus = useChatStore(s => s.connectionStatus)
   const sessionId = useChatStore(s => s.sessionId)
   const messages = useChatStore(s => s.messages)
