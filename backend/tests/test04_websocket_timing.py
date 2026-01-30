@@ -5,6 +5,7 @@ Timing test: WebSocket vs HTTP SSE TTFT comparison.
 Requires server: python main.py serve --port 7001
 Run: python tests/test04_websocket_timing.py [--websocket-only|--http-only] [--turns N]
 """
+
 import argparse
 import asyncio
 import json
@@ -15,6 +16,7 @@ from pathlib import Path
 
 # Load .env from backend directory
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 import httpx
@@ -29,11 +31,17 @@ DEFAULT_USERNAME = os.getenv("CLI_USERNAME", "admin")
 DEFAULT_PASSWORD = os.getenv("CLI_ADMIN_PASSWORD")
 
 if not API_KEY:
-    print("ERROR: API_KEY not set. Create .env file with API_KEY=your_key", file=sys.stderr)
+    print(
+        "ERROR: API_KEY not set. Create .env file with API_KEY=your_key",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 if not DEFAULT_PASSWORD:
-    print("ERROR: CLI_ADMIN_PASSWORD not set. Create .env file with CLI_ADMIN_PASSWORD=your_password", file=sys.stderr)
+    print(
+        "ERROR: CLI_ADMIN_PASSWORD not set. Create .env file with CLI_ADMIN_PASSWORD=your_password",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 
@@ -57,7 +65,7 @@ async def get_jwt_token() -> str:
             json={
                 "username": DEFAULT_USERNAME,
                 "password": DEFAULT_PASSWORD,
-            }
+            },
         )
         response.raise_for_status()
         data = response.json()
@@ -201,24 +209,38 @@ def print_summary(http_times: list[float], ws_times: list[float]) -> None:
         http_t = http_times[i] if i < len(http_times) else 0
         ws_t = ws_times[i] if i < len(ws_times) else 0
         savings = http_t - ws_t
-        log(f"| {i+1}    | {http_t:.0f}ms              | {ws_t:.0f}ms                 | {savings:.0f}ms    |")
+        log(
+            f"| {i + 1}    | {http_t:.0f}ms              | {ws_t:.0f}ms                 | {savings:.0f}ms    |"
+        )
 
     if len(http_times) >= 2 and len(ws_times) >= 2:
         avg_http_followup = sum(http_times[1:]) / len(http_times[1:])
         avg_ws_followup = sum(ws_times[1:]) / len(ws_times[1:])
-        log(f"\nAverage follow-up TTFT:")
+        log("\nAverage follow-up TTFT:")
         log(f"  HTTP SSE:   {avg_http_followup:.0f}ms")
         log(f"  WebSocket:  {avg_ws_followup:.0f}ms")
         if avg_http_followup > 0:
-            savings_pct = (avg_http_followup - avg_ws_followup) / avg_http_followup * 100
-            log(f"  Savings:    {avg_http_followup - avg_ws_followup:.0f}ms ({savings_pct:.0f}% faster)")
+            savings_pct = (
+                (avg_http_followup - avg_ws_followup) / avg_http_followup * 100
+            )
+            log(
+                f"  Savings:    {avg_http_followup - avg_ws_followup:.0f}ms ({savings_pct:.0f}% faster)"
+            )
 
 
 async def main() -> None:
-    parser = argparse.ArgumentParser(description="WebSocket vs HTTP SSE timing comparison")
-    parser.add_argument("--websocket-only", action="store_true", help="Run WebSocket test only")
-    parser.add_argument("--http-only", action="store_true", help="Run HTTP SSE test only")
-    parser.add_argument("--turns", type=int, default=3, help="Number of conversation turns")
+    parser = argparse.ArgumentParser(
+        description="WebSocket vs HTTP SSE timing comparison"
+    )
+    parser.add_argument(
+        "--websocket-only", action="store_true", help="Run WebSocket test only"
+    )
+    parser.add_argument(
+        "--http-only", action="store_true", help="Run HTTP SSE test only"
+    )
+    parser.add_argument(
+        "--turns", type=int, default=3, help="Number of conversation turns"
+    )
     args = parser.parse_args()
 
     log("=" * 60)
@@ -241,13 +263,19 @@ async def main() -> None:
         log("\n" + "=" * 60)
         log("WebSocket Results")
         log("=" * 60)
-        avg = sum(ws_times[1:]) / len(ws_times[1:]) if len(ws_times) > 1 else ws_times[0]
+        avg = (
+            sum(ws_times[1:]) / len(ws_times[1:]) if len(ws_times) > 1 else ws_times[0]
+        )
         log(f"Average follow-up TTFT: {avg:.0f}ms")
     elif http_times:
         log("\n" + "=" * 60)
         log("HTTP SSE Results")
         log("=" * 60)
-        avg = sum(http_times[1:]) / len(http_times[1:]) if len(http_times) > 1 else http_times[0]
+        avg = (
+            sum(http_times[1:]) / len(http_times[1:])
+            if len(http_times) > 1
+            else http_times[0]
+        )
         log(f"Average follow-up TTFT: {avg:.0f}ms")
 
 

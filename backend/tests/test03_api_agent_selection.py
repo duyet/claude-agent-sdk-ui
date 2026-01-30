@@ -5,6 +5,7 @@ API test: Agent selection and multi-turn chat via HTTP SSE and WebSocket.
 Requires server: python main.py serve --port 7001
 Run: python tests/test03_api_agent_selection.py [--mode sse|ws|both]
 """
+
 import argparse
 import asyncio
 import json
@@ -20,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Load .env from backend directory
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 import httpx
@@ -38,11 +40,17 @@ DEFAULT_USERNAME = os.getenv("CLI_USERNAME", "admin")
 DEFAULT_PASSWORD = os.getenv("CLI_ADMIN_PASSWORD")
 
 if not API_KEY:
-    print("ERROR: API_KEY not set. Create .env file with API_KEY=your_key", file=sys.stderr)
+    print(
+        "ERROR: API_KEY not set. Create .env file with API_KEY=your_key",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 if not DEFAULT_PASSWORD:
-    print("ERROR: CLI_ADMIN_PASSWORD not set. Create .env file with CLI_ADMIN_PASSWORD=your_password", file=sys.stderr)
+    print(
+        "ERROR: CLI_ADMIN_PASSWORD not set. Create .env file with CLI_ADMIN_PASSWORD=your_password",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 
@@ -77,7 +85,9 @@ class ConversationClient(ABC):
         """Establish connection."""
 
     @abstractmethod
-    async def send_message(self, content: str, agent_id: Optional[str] = None) -> TurnResult:
+    async def send_message(
+        self, content: str, agent_id: Optional[str] = None
+    ) -> TurnResult:
         """Send message and get response."""
 
     @abstractmethod
@@ -96,7 +106,9 @@ class SSEClient(ConversationClient):
         headers = {"X-API-Key": API_KEY} if API_KEY else {}
         self._client = httpx.AsyncClient(timeout=120.0, headers=headers)
 
-    async def send_message(self, content: str, agent_id: Optional[str] = None) -> TurnResult:
+    async def send_message(
+        self, content: str, agent_id: Optional[str] = None
+    ) -> TurnResult:
         if not self._client:
             raise RuntimeError("Client not connected")
 
@@ -136,7 +148,9 @@ class SSEClient(ConversationClient):
 
         return result
 
-    def _process_sse_data(self, data: dict, event: Optional[str], result: TurnResult) -> TurnResult:
+    def _process_sse_data(
+        self, data: dict, event: Optional[str], result: TurnResult
+    ) -> TurnResult:
         """Process SSE data event."""
         if event == "done":
             log("  [done]")
@@ -190,7 +204,9 @@ class WebSocketClient(ConversationClient):
             raise RuntimeError(f"Unexpected ready signal: {data}")
         log("  [ready]")
 
-    async def send_message(self, content: str, agent_id: Optional[str] = None) -> TurnResult:
+    async def send_message(
+        self, content: str, agent_id: Optional[str] = None
+    ) -> TurnResult:
         if not self._ws:
             raise RuntimeError("WebSocket not connected")
 
@@ -240,7 +256,7 @@ async def get_user_token() -> str:
             json={
                 "username": DEFAULT_USERNAME,
                 "password": DEFAULT_PASSWORD,
-            }
+            },
         )
         response.raise_for_status()
         data = response.json()
@@ -271,7 +287,9 @@ async def get_history(session_id: str, user_token: str) -> dict:
         return response.json()
 
 
-async def run_multi_turn_test(client: ConversationClient, agent: Agent, mode_name: str) -> None:
+async def run_multi_turn_test(
+    client: ConversationClient, agent: Agent, mode_name: str
+) -> None:
     """Run multi-turn conversation test."""
     log(f"\n{'=' * 60}")
     log(f"Multi-Turn Test ({mode_name})")
@@ -286,7 +304,11 @@ async def run_multi_turn_test(client: ConversationClient, agent: Agent, mode_nam
         prompt1 = "Say just 'OK' and nothing else."
         log(f'  Prompt: "{prompt1}"')
         result1 = await client.send_message(prompt1, agent_id=agent.agent_id)
-        log(f'  Response: "{result1.text[:100]}"' if result1.text else "  Response: (empty)")
+        log(
+            f'  Response: "{result1.text[:100]}"'
+            if result1.text
+            else "  Response: (empty)"
+        )
 
         session_id = result1.session_id or result1.sdk_session_id
         if not session_id:
@@ -298,14 +320,22 @@ async def run_multi_turn_test(client: ConversationClient, agent: Agent, mode_nam
         prompt2 = "Now say just 'YES'"
         log(f'  Prompt: "{prompt2}"')
         result2 = await client.send_message(prompt2)
-        log(f'  Response: "{result2.text[:100]}"' if result2.text else "  Response: (empty)")
+        log(
+            f'  Response: "{result2.text[:100]}"'
+            if result2.text
+            else "  Response: (empty)"
+        )
 
         # Turn 3: Another follow-up
         log("\n--- Turn 3: Another follow-up ---")
         prompt3 = "Now say just 'HELLO'"
         log(f'  Prompt: "{prompt3}"')
         result3 = await client.send_message(prompt3)
-        log(f'  Response: "{result3.text[:100]}"' if result3.text else "  Response: (empty)")
+        log(
+            f'  Response: "{result3.text[:100]}"'
+            if result3.text
+            else "  Response: (empty)"
+        )
 
         # Get history (only for SSE - WebSocket uses SDK session directly)
         if isinstance(client, SSEClient) and session_id:
@@ -324,12 +354,14 @@ async def run_multi_turn_test(client: ConversationClient, agent: Agent, mode_nam
 
 
 async def main() -> None:
-    parser = argparse.ArgumentParser(description="API Agent Selection & Multi-Turn Test")
+    parser = argparse.ArgumentParser(
+        description="API Agent Selection & Multi-Turn Test"
+    )
     parser.add_argument(
         "--mode",
         choices=["sse", "ws", "both"],
         default="both",
-        help="Connection mode: sse (HTTP SSE), ws (WebSocket), or both (default)"
+        help="Connection mode: sse (HTTP SSE), ws (WebSocket), or both (default)",
     )
     args = parser.parse_args()
 

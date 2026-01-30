@@ -1,4 +1,5 @@
 """Tests for authentication dependencies."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -192,7 +193,7 @@ class TestGetCurrentUserWs:
             "exp": 9999999999,
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             result = await get_current_user_ws("valid-token")
 
             assert isinstance(result, UserTokenPayload)
@@ -211,7 +212,7 @@ class TestGetCurrentUserWs:
             "role": "admin",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             result = await get_current_user_ws("valid-token")
 
             assert result.user_id == "fallback-user-456"
@@ -227,7 +228,7 @@ class TestGetCurrentUserWs:
             "username": "norole",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             result = await get_current_user_ws("valid-token")
 
             assert result.role == "user"
@@ -235,7 +236,7 @@ class TestGetCurrentUserWs:
     @pytest.mark.asyncio
     async def test_raises_500_when_token_service_not_configured(self):
         """Test that missing token_service raises 500 error."""
-        with patch('api.dependencies.auth.token_service', None):
+        with patch("api.dependencies.auth.token_service", None):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user_ws("any-token")
 
@@ -248,7 +249,7 @@ class TestGetCurrentUserWs:
         mock_service = MagicMock()
         mock_service.decode_token_any_type.return_value = None
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user_ws("invalid-token")
 
@@ -264,7 +265,7 @@ class TestGetCurrentUserWs:
             "role": "user",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user_ws("token-without-username")
 
@@ -280,7 +281,7 @@ class TestGetCurrentUserWs:
             "username": "",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user_ws("token-with-empty-username")
 
@@ -295,7 +296,7 @@ class TestGetCurrentUserWs:
             "username": "minimal",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             result = await get_current_user_ws("minimal-token")
 
             assert result.user_id == ""
@@ -315,7 +316,7 @@ class TestGetCurrentUserWs:
             "email": "user@example.com",
         }
 
-        with patch('api.dependencies.auth.token_service', mock_service):
+        with patch("api.dependencies.auth.token_service", mock_service):
             result = await get_current_user_ws("full-token")
 
             assert result.user_id == "full-user-789"  # user_id takes precedence
@@ -328,11 +329,7 @@ class TestUserTokenPayloadConstruction:
 
     def test_valid_user_payload(self):
         """Test creating a valid UserTokenPayload."""
-        payload = UserTokenPayload(
-            user_id="test-id",
-            username="testuser",
-            role="user"
-        )
+        payload = UserTokenPayload(user_id="test-id", username="testuser", role="user")
 
         assert payload.user_id == "test-id"
         assert payload.username == "testuser"
@@ -340,11 +337,7 @@ class TestUserTokenPayloadConstruction:
 
     def test_admin_role_validation(self):
         """Test that admin role is valid."""
-        payload = UserTokenPayload(
-            user_id="admin-id",
-            username="admin",
-            role="admin"
-        )
+        payload = UserTokenPayload(user_id="admin-id", username="admin", role="admin")
 
         assert payload.role == "admin"
 
@@ -354,21 +347,13 @@ class TestUserTokenPayloadConstruction:
             UserTokenPayload(
                 user_id="test-id",
                 username="testuser",
-                role="superuser"  # Invalid role
+                role="superuser",  # Invalid role
             )
 
     def test_model_dump(self):
         """Test that model can be serialized."""
-        payload = UserTokenPayload(
-            user_id="test-id",
-            username="testuser",
-            role="user"
-        )
+        payload = UserTokenPayload(user_id="test-id", username="testuser", role="user")
 
         data = payload.model_dump()
 
-        assert data == {
-            "user_id": "test-id",
-            "username": "testuser",
-            "role": "user"
-        }
+        assert data == {"user_id": "test-id", "username": "testuser", "role": "user"}

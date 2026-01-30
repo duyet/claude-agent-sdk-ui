@@ -1,4 +1,5 @@
 """Tests for JWT authentication middleware for WebSocket connections."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -208,15 +209,11 @@ class TestValidateWebSocketTokenWithoutTokenService:
             )
 
     @pytest.mark.asyncio
-    async def test_no_token_service_with_valid_token_still_fails(
-        self, mock_websocket
-    ):
+    async def test_no_token_service_with_valid_token_still_fails(self, mock_websocket):
         """Test that even a valid token fails when token_service is None."""
         with patch("api.middleware.jwt_auth.token_service", None):
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await validate_websocket_token(
-                    mock_websocket, token="valid.jwt.token"
-                )
+                await validate_websocket_token(mock_websocket, token="valid.jwt.token")
 
             assert exc_info.value.code == status.WS_1011_INTERNAL_ERROR
             mock_websocket.close.assert_called_once()
@@ -239,8 +236,7 @@ class TestValidateWebSocketTokenWebSocketClientInfo:
 
         # Check that warning was logged with client info
         assert any(
-            "client=192.168.1.100" in record.message
-            for record in caplog.records
+            "client=192.168.1.100" in record.message for record in caplog.records
         )
 
     @pytest.mark.asyncio
@@ -256,10 +252,7 @@ class TestValidateWebSocketTokenWebSocketClientInfo:
                 await validate_websocket_token(mock_websocket, token="bad.token")
 
         # Check that warning was logged with client info
-        assert any(
-            "client=10.0.0.50" in record.message
-            for record in caplog.records
-        )
+        assert any("client=10.0.0.50" in record.message for record in caplog.records)
 
     @pytest.mark.asyncio
     async def test_logs_unknown_when_client_is_none(
@@ -274,10 +267,7 @@ class TestValidateWebSocketTokenWebSocketClientInfo:
                 await validate_websocket_token(mock_websocket, token=None)
 
         # Check that 'unknown' is logged instead of crashing
-        assert any(
-            "client=unknown" in record.message
-            for record in caplog.records
-        )
+        assert any("client=unknown" in record.message for record in caplog.records)
 
 
 class TestValidateWebSocketTokenDebugLogging:
@@ -298,14 +288,11 @@ class TestValidateWebSocketTokenDebugLogging:
                 assert user_id == "user-123"
                 # Verify debug log contains user info
                 assert any(
-                    f"user={user_id}" in record.message
-                    for record in caplog.records
+                    f"user={user_id}" in record.message for record in caplog.records
                 )
 
     @pytest.mark.asyncio
-    async def test_no_token_service_logs_error(
-        self, mock_websocket, caplog
-    ):
+    async def test_no_token_service_logs_error(self, mock_websocket, caplog):
         """Test that missing token_service logs error message."""
         with patch("api.middleware.jwt_auth.token_service", None):
             with pytest.raises(WebSocketDisconnect):
@@ -323,9 +310,7 @@ class TestValidateWebSocketTokenDifferentTokenTypes:
     """Test cases for different JWT token types."""
 
     @pytest.mark.asyncio
-    async def test_accepts_access_token(
-        self, mock_websocket, mock_token_service
-    ):
+    async def test_accepts_access_token(self, mock_websocket, mock_token_service):
         """Test that access type tokens are accepted."""
         access_token_payload = {
             "sub": "user-123",
@@ -344,9 +329,7 @@ class TestValidateWebSocketTokenDifferentTokenTypes:
             mock_websocket.close.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_accepts_refresh_token(
-        self, mock_websocket, mock_token_service
-    ):
+    async def test_accepts_refresh_token(self, mock_websocket, mock_token_service):
         """Test that refresh type tokens are accepted."""
         refresh_token_payload = {
             "sub": "user-123",
@@ -386,9 +369,7 @@ class TestValidateWebSocketTokenDifferentTokenTypes:
             mock_websocket.close.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_accepts_token_without_type(
-        self, mock_websocket, mock_token_service
-    ):
+    async def test_accepts_token_without_type(self, mock_websocket, mock_token_service):
         """Test that tokens without type field are accepted."""
         no_type_payload = {
             "sub": "user-123",
@@ -471,9 +452,7 @@ class TestValidateWebSocketTokenEdgeCases:
         mock_token_service.decode_token_any_type.return_value = empty_sub_payload
 
         with patch("api.middleware.jwt_auth.token_service", mock_token_service):
-            user_id, jti = await validate_websocket_token(
-                mock_websocket, token="token"
-            )
+            user_id, jti = await validate_websocket_token(mock_websocket, token="token")
 
             assert user_id == ""
             assert jti == "token-456"
@@ -487,9 +466,7 @@ class TestValidateWebSocketTokenEdgeCases:
         mock_token_service.decode_token_any_type.return_value = empty_jti_payload
 
         with patch("api.middleware.jwt_auth.token_service", mock_token_service):
-            user_id, jti = await validate_websocket_token(
-                mock_websocket, token="token"
-            )
+            user_id, jti = await validate_websocket_token(mock_websocket, token="token")
 
             assert user_id == "user-123"
             assert jti == ""
@@ -499,18 +476,14 @@ class TestValidateWebSocketTokenRevokedTokens:
     """Test cases for revoked token handling."""
 
     @pytest.mark.asyncio
-    async def test_revoked_token_rejected(
-        self, mock_websocket, mock_token_service
-    ):
+    async def test_revoked_token_rejected(self, mock_websocket, mock_token_service):
         """Test that revoked tokens are rejected."""
         # Token service returns None for revoked tokens
         mock_token_service.decode_token_any_type.return_value = None
 
         with patch("api.middleware.jwt_auth.token_service", mock_token_service):
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await validate_websocket_token(
-                    mock_websocket, token="revoked.token"
-                )
+                await validate_websocket_token(mock_websocket, token="revoked.token")
 
             assert exc_info.value.code == status.WS_1008_POLICY_VIOLATION
             assert "Invalid or expired JWT token" in exc_info.value.reason

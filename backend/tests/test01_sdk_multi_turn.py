@@ -4,6 +4,7 @@ Direct SDK test: Multi-turn conversation with ConversationSession.
 
 Run: python tests/test01_sdk_multi_turn.py
 """
+
 import sys
 from pathlib import Path
 
@@ -17,7 +18,9 @@ from agent.core.agent_options import create_agent_sdk_options
 from agent.display import print_header, print_info
 
 
-async def conduct_turn(session: ConversationSession, turn_number: int, prompt: str) -> None:
+async def conduct_turn(
+    session: ConversationSession, turn_number: int, prompt: str
+) -> None:
     """Conduct a single turn using ConversationSession.
 
     Args:
@@ -34,7 +37,9 @@ async def conduct_turn(session: ConversationSession, turn_number: int, prompt: s
 
 async def main() -> None:
     """Demonstrate 3-turn conversation with ConversationSession."""
-    print_header("Claude Agent SDK - Multi-Turn Test with ConversationSession", style="bold cyan")
+    print_header(
+        "Claude Agent SDK - Multi-Turn Test with ConversationSession", style="bold cyan"
+    )
 
     # Create session with enhanced options (Skills + Subagents)
     options = create_agent_sdk_options()
@@ -47,7 +52,11 @@ async def main() -> None:
         # Three turns
         await conduct_turn(session, 1, "Hello! What is 2 + 2?")
         await conduct_turn(session, 2, "Great! Now what is 5 + 3?")
-        await conduct_turn(session, 3, "What were the two answers you gave me in our previous messages?")
+        await conduct_turn(
+            session,
+            3,
+            "What were the two answers you gave me in our previous messages?",
+        )
 
         print_header("Test Complete", style="bold green")
         print_info("All 3 turns completed successfully!")
@@ -64,6 +73,7 @@ async def main() -> None:
         print()
         print_info(f"Test failed: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         await session.disconnect()

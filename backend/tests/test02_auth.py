@@ -3,8 +3,8 @@ API test: JWT authentication (TokenService, ws-token, ws-token-refresh).
 
 Run: pytest tests/test02_auth.py -v
 """
+
 import time
-from datetime import timedelta
 
 import pytest
 from jose import jwt
@@ -15,8 +15,7 @@ from api.config import JWT_CONFIG
 
 # Skip tests if JWT is not configured
 pytestmark = pytest.mark.skipif(
-    not JWT_CONFIG.get("secret_key"),
-    reason="API_KEY not configured (required for JWT)"
+    not JWT_CONFIG.get("secret_key"), reason="API_KEY not configured (required for JWT)"
 )
 
 
@@ -176,7 +175,9 @@ class TestTokenService:
             "aud": service.audience,
         }
 
-        expired_token = jwt.encode(payload, service.secret_key, algorithm=service.algorithm)
+        expired_token = jwt.encode(
+            payload, service.secret_key, algorithm=service.algorithm
+        )
 
         # Should fail validation (expired beyond leeway)
         result = service.decode_and_validate_token(expired_token, token_type="access")
@@ -285,10 +286,7 @@ class TestWsTokenEndpoint:
 
     def test_ws_token_with_valid_api_key(self, client, api_key):
         """Test ws-token endpoint with valid API key."""
-        response = client.post(
-            "/api/v1/auth/ws-token",
-            json={"api_key": api_key}
-        )
+        response = client.post("/api/v1/auth/ws-token", json={"api_key": api_key})
 
         assert response.status_code == 200
         data = response.json()
@@ -302,18 +300,14 @@ class TestWsTokenEndpoint:
     def test_ws_token_with_invalid_api_key(self, client):
         """Test ws-token endpoint with invalid API key."""
         response = client.post(
-            "/api/v1/auth/ws-token",
-            json={"api_key": "invalid_api_key"}
+            "/api/v1/auth/ws-token", json={"api_key": "invalid_api_key"}
         )
 
         assert response.status_code == 401
 
     def test_ws_token_without_api_key(self, client):
         """Test ws-token endpoint without API key."""
-        response = client.post(
-            "/api/v1/auth/ws-token",
-            json={}
-        )
+        response = client.post("/api/v1/auth/ws-token", json={})
 
         assert response.status_code == 422  # Validation error
 
@@ -324,17 +318,14 @@ class TestWsTokenRefreshEndpoint:
     def test_refresh_with_valid_token(self, client, api_key):
         """Test refresh endpoint with valid refresh token."""
         # First get a token pair
-        token_response = client.post(
-            "/api/v1/auth/ws-token",
-            json={"api_key": api_key}
-        )
+        token_response = client.post("/api/v1/auth/ws-token", json={"api_key": api_key})
         assert token_response.status_code == 200
         tokens = token_response.json()
 
         # Now refresh
         response = client.post(
             "/api/v1/auth/ws-token-refresh",
-            json={"refresh_token": tokens["refresh_token"]}
+            json={"refresh_token": tokens["refresh_token"]},
         )
 
         assert response.status_code == 200
@@ -346,35 +337,28 @@ class TestWsTokenRefreshEndpoint:
     def test_refresh_with_invalid_token(self, client):
         """Test refresh endpoint with invalid token."""
         response = client.post(
-            "/api/v1/auth/ws-token-refresh",
-            json={"refresh_token": "invalid_token"}
+            "/api/v1/auth/ws-token-refresh", json={"refresh_token": "invalid_token"}
         )
 
         assert response.status_code == 401
 
     def test_refresh_without_token(self, client):
         """Test refresh endpoint without token."""
-        response = client.post(
-            "/api/v1/auth/ws-token-refresh",
-            json={}
-        )
+        response = client.post("/api/v1/auth/ws-token-refresh", json={})
 
         assert response.status_code == 422  # Validation error
 
     def test_refresh_with_access_token(self, client, api_key):
         """Test refresh endpoint rejects access tokens."""
         # First get a token pair
-        token_response = client.post(
-            "/api/v1/auth/ws-token",
-            json={"api_key": api_key}
-        )
+        token_response = client.post("/api/v1/auth/ws-token", json={"api_key": api_key})
         assert token_response.status_code == 200
         tokens = token_response.json()
 
         # Try to use access token as refresh token
         response = client.post(
             "/api/v1/auth/ws-token-refresh",
-            json={"refresh_token": tokens["access_token"]}
+            json={"refresh_token": tokens["access_token"]},
         )
 
         assert response.status_code == 401

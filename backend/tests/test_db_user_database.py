@@ -12,7 +12,7 @@ Tests cover:
 
 Uses in-memory SQLite database for isolation.
 """
-import os
+
 import sqlite3
 import uuid
 from datetime import datetime
@@ -20,7 +20,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-import bcrypt
 
 from api.db.user_database import (
     DbUser,
@@ -214,7 +213,7 @@ class TestGetDbConnection:
         mock_get_conn.return_value = mock_conn
 
         with pytest.raises(ValueError):
-            with get_db_connection() as conn:
+            with get_db_connection() as _conn:
                 raise ValueError("Test error")
 
         # Verify connection was still closed
@@ -226,7 +225,9 @@ class TestInitDatabase:
 
     @patch("api.db.user_database._create_default_users")
     @patch("api.db.user_database._get_database_path")
-    def test_init_database_creates_users_table(self, mock_db_path, mock_create_users, tmp_path):
+    def test_init_database_creates_users_table(
+        self, mock_db_path, mock_create_users, tmp_path
+    ):
         """Test that init_database creates the users table."""
         db_file = tmp_path / "test_init.db"
         mock_db_path.return_value = db_file
@@ -261,7 +262,9 @@ class TestInitDatabase:
 
     @patch("api.db.user_database._create_default_users")
     @patch("api.db.user_database._get_database_path")
-    def test_init_database_creates_username_index(self, mock_db_path, mock_create_users, tmp_path):
+    def test_init_database_creates_username_index(
+        self, mock_db_path, mock_create_users, tmp_path
+    ):
         """Test that init_database creates index on username."""
         db_file = tmp_path / "test_init_index.db"
         mock_db_path.return_value = db_file
@@ -284,7 +287,9 @@ class TestInitDatabase:
 
     @patch("api.db.user_database._create_default_users")
     @patch("api.db.user_database._get_database_path")
-    def test_init_database_is_idempotent(self, mock_db_path, mock_create_users, tmp_path):
+    def test_init_database_is_idempotent(
+        self, mock_db_path, mock_create_users, tmp_path
+    ):
         """Test that init_database can be called multiple times safely."""
         db_file = tmp_path / "test_idempotent.db"
         mock_db_path.return_value = db_file
@@ -308,7 +313,9 @@ class TestInitDatabase:
 
     @patch("api.db.user_database._create_default_users")
     @patch("api.db.user_database._get_database_path")
-    def test_init_database_calls_create_default_users(self, mock_db_path, mock_create_users, tmp_path):
+    def test_init_database_calls_create_default_users(
+        self, mock_db_path, mock_create_users, tmp_path
+    ):
         """Test that init_database calls _create_default_users."""
         db_file = tmp_path / "test_create_users.db"
         mock_db_path.return_value = db_file
@@ -332,7 +339,9 @@ class TestCreateDefaultUsers:
     """Test default user creation."""
 
     @patch("api.db.user_database._get_database_path")
-    def test_create_default_users_with_no_env_vars(self, mock_db_path, tmp_path, monkeypatch):
+    def test_create_default_users_with_no_env_vars(
+        self, mock_db_path, tmp_path, monkeypatch
+    ):
         """Test that no users are created when env vars are not set."""
         db_file = tmp_path / "test_no_users.db"
         mock_db_path.return_value = db_file
@@ -573,10 +582,20 @@ class TestGetUserByUsername:
 
         user_id = str(uuid.uuid4())
         password_hash = hash_password("test_password")
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, is_active)
             VALUES (?, ?, ?, ?, ?, ?, 1)
-        """, (user_id, "testuser", password_hash, "Test User", "user", "2024-01-01T00:00:00"))
+        """,
+            (
+                user_id,
+                "testuser",
+                password_hash,
+                "Test User",
+                "user",
+                "2024-01-01T00:00:00",
+            ),
+        )
         conn.commit()
         conn.close()
 
@@ -644,18 +663,21 @@ class TestGetUserByUsername:
 
         user_id = str(uuid.uuid4())
         password_hash = hash_password("test_password")
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, last_login, is_active)
             VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-        """, (
-            user_id,
-            "testuser",
-            password_hash,
-            "Test User",
-            "admin",
-            "2024-01-01T00:00:00",
-            "2024-01-02T12:00:00"
-        ))
+        """,
+            (
+                user_id,
+                "testuser",
+                password_hash,
+                "Test User",
+                "admin",
+                "2024-01-01T00:00:00",
+                "2024-01-02T12:00:00",
+            ),
+        )
         conn.commit()
         conn.close()
 
@@ -690,10 +712,13 @@ class TestGetUserByUsername:
 
         user_id = str(uuid.uuid4())
         password_hash = hash_password("test_password")
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, is_active)
             VALUES (?, ?, ?, NULL, ?, NULL, 1)
-        """, (user_id, "testuser", password_hash, "user"))
+        """,
+            (user_id, "testuser", password_hash, "user"),
+        )
         conn.commit()
         conn.close()
 
@@ -729,10 +754,20 @@ class TestGetUserByUsername:
 
         user_id = str(uuid.uuid4())
         password_hash = hash_password("test_password")
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, is_active)
             VALUES (?, ?, ?, ?, ?, ?, 0)
-        """, (user_id, "inactive_user", password_hash, "Inactive User", "user", "2024-01-01T00:00:00"))
+        """,
+            (
+                user_id,
+                "inactive_user",
+                password_hash,
+                "Inactive User",
+                "user",
+                "2024-01-01T00:00:00",
+            ),
+        )
         conn.commit()
         conn.close()
 
@@ -759,7 +794,7 @@ class TestVerifyPassword:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login=None,
-            is_active=True
+            is_active=True,
         )
         mock_get_user.return_value = mock_user
 
@@ -780,7 +815,7 @@ class TestVerifyPassword:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login=None,
-            is_active=True
+            is_active=True,
         )
         mock_get_user.return_value = mock_user
 
@@ -810,7 +845,7 @@ class TestVerifyPassword:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login=None,
-            is_active=False
+            is_active=False,
         )
         mock_get_user.return_value = mock_user
 
@@ -831,7 +866,7 @@ class TestVerifyPassword:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login=None,
-            is_active=True
+            is_active=True,
         )
         mock_get_user.return_value = mock_user
 
@@ -851,7 +886,7 @@ class TestVerifyPassword:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login=None,
-            is_active=True
+            is_active=True,
         )
         mock_get_user.return_value = mock_user
 
@@ -886,10 +921,13 @@ class TestUpdateLastLogin:
         """)
 
         user_id = str(uuid.uuid4())
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, is_active)
             VALUES (?, ?, ?, ?, ?, ?, 1)
-        """, (user_id, "testuser", "hash", "Test User", "user", "2024-01-01T00:00:00"))
+        """,
+            (user_id, "testuser", "hash", "Test User", "user", "2024-01-01T00:00:00"),
+        )
         conn.commit()
         conn.close()
 
@@ -958,10 +996,21 @@ class TestUpdateLastLogin:
 
         user_id = str(uuid.uuid4())
         old_login = "2024-01-01T00:00:00"
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO users (id, username, password_hash, full_name, role, created_at, last_login, is_active)
             VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-        """, (user_id, "testuser", "hash", "Test User", "user", "2024-01-01T00:00:00", old_login))
+        """,
+            (
+                user_id,
+                "testuser",
+                "hash",
+                "Test User",
+                "user",
+                "2024-01-01T00:00:00",
+                old_login,
+            ),
+        )
         conn.commit()
         conn.close()
 
@@ -993,7 +1042,7 @@ class TestDbUserDataclass:
             role="user",
             created_at="2024-01-01T00:00:00",
             last_login="2024-01-02T00:00:00",
-            is_active=True
+            is_active=True,
         )
 
         assert user.id == "user123"
@@ -1015,7 +1064,7 @@ class TestDbUserDataclass:
             role="user",
             created_at=None,
             last_login=None,
-            is_active=False
+            is_active=False,
         )
 
         assert user.full_name is None
@@ -1080,10 +1129,20 @@ class TestIntegration:
         for username, password, full_name, role in users:
             user_id = str(uuid.uuid4())
             password_hash = hash_password(password)
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO users (id, username, password_hash, full_name, role, created_at, is_active)
                 VALUES (?, ?, ?, ?, ?, ?, 1)
-            """, (user_id, username, password_hash, full_name, role, datetime.now().isoformat()))
+            """,
+                (
+                    user_id,
+                    username,
+                    password_hash,
+                    full_name,
+                    role,
+                    datetime.now().isoformat(),
+                ),
+            )
 
         conn.commit()
         conn.close()

@@ -1,7 +1,5 @@
 """Tests for API constants."""
 
-import pytest
-
 from api.constants import (
     ASK_USER_QUESTION_TIMEOUT,
     ErrorCode,

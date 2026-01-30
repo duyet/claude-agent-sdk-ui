@@ -1,10 +1,15 @@
 """Tests for QuestionManager service."""
+
 import asyncio
 import time
 
 import pytest
 
-from api.services.question_manager import PendingQuestion, QuestionManager, get_question_manager
+from api.services.question_manager import (
+    PendingQuestion,
+    QuestionManager,
+    get_question_manager,
+)
 
 
 class TestPendingQuestion:
@@ -14,10 +19,7 @@ class TestPendingQuestion:
         """Test creating a pending question."""
         questions = [{"id": "q1", "text": "Question 1"}]
         before = time.time()
-        pending = PendingQuestion(
-            question_id="q_123",
-            questions=questions
-        )
+        pending = PendingQuestion(question_id="q_123", questions=questions)
         after = time.time()
 
         assert pending.question_id == "q_123"

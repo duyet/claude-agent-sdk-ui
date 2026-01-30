@@ -114,8 +114,8 @@ async def get_current_user(request: Request) -> UserInfo:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     return UserInfo(
-        id=user_context.user_id,
-        username=user_context.username,
-        full_name=user_context.get('full_name'),
-        role=user_context.role,
+        id=user_context.get("user_id"),
+        username=user_context.get("username"),
+        full_name=user_context.get("full_name"),
+        role=user_context.get("role", "user"),
     )

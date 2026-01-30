@@ -8,9 +8,9 @@ Tests cover:
 
 Note: Uses unittest.mock.MagicMock with spec to properly simulate SDK types.
 """
+
 from unittest.mock import MagicMock
 
-import pytest
 
 from api.constants import EventType
 from api.services.message_utils import (
@@ -36,15 +36,20 @@ from api.services.message_utils import (
 # Fixtures for creating mock message objects
 # ============================================================================
 
+
 def create_mock_system_message(subtype="init", data=None):
     """Create a mock SystemMessage that passes isinstance and type() checks."""
     from claude_agent_sdk.types import SystemMessage
+
     return SystemMessage(subtype=subtype, data=data or {})
 
 
-def create_mock_stream_event(delta_type="text_delta", text=None, tool_use_id=None, content=None, is_error=False):
+def create_mock_stream_event(
+    delta_type="text_delta", text=None, tool_use_id=None, content=None, is_error=False
+):
     """Create a mock StreamEvent that passes isinstance and type() checks."""
     from claude_agent_sdk.types import StreamEvent
+
     delta = {"type": delta_type}
     if text is not None:
         delta["text"] = text
@@ -55,42 +60,44 @@ def create_mock_stream_event(delta_type="text_delta", text=None, tool_use_id=Non
     if is_error:
         delta["is_error"] = is_error
     return StreamEvent(
-        uuid="test-uuid",
-        session_id="test-session",
-        event={"delta": delta}
+        uuid="test-uuid", session_id="test-session", event={"delta": delta}
     )
 
 
 def create_mock_tool_use_block(block_id="tool-123", name="bash", input_data=None):
     """Create a mock ToolUseBlock that passes isinstance and type() checks."""
     from claude_agent_sdk.types import ToolUseBlock
+
     return ToolUseBlock(id=block_id, name=name, input=input_data or {})
 
 
-def create_mock_tool_result_block(tool_use_id="tool-123", content="output", is_error=False):
+def create_mock_tool_result_block(
+    tool_use_id="tool-123", content="output", is_error=False
+):
     """Create a mock ToolResultBlock that passes isinstance and type() checks."""
     from claude_agent_sdk.types import ToolResultBlock
+
     return ToolResultBlock(tool_use_id=tool_use_id, content=content, is_error=is_error)
 
 
 def create_mock_assistant_message(content=None):
     """Create a mock AssistantMessage that passes isinstance and type() checks."""
     from claude_agent_sdk.types import AssistantMessage
-    return AssistantMessage(
-        content=content or [],
-        model="test-model"
-    )
+
+    return AssistantMessage(content=content or [], model="test-model")
 
 
 def create_mock_user_message(content=None):
     """Create a mock UserMessage that passes isinstance and type() checks."""
     from claude_agent_sdk.types import UserMessage
+
     return UserMessage(content=content or [])
 
 
 def create_mock_result_message(num_turns=1, total_cost_usd=0.0):
     """Create a mock ResultMessage that passes isinstance and type() checks."""
     from claude_agent_sdk.types import ResultMessage
+
     return ResultMessage(
         subtype="result",
         duration_ms=0,
@@ -98,13 +105,14 @@ def create_mock_result_message(num_turns=1, total_cost_usd=0.0):
         is_error=False,
         num_turns=num_turns,
         session_id="test-session",
-        total_cost_usd=total_cost_usd
+        total_cost_usd=total_cost_usd,
     )
 
 
 # ============================================================================
 # Tests for _format_event
 # ============================================================================
+
 
 class TestFormatEvent:
     """Tests for _format_event function."""
@@ -139,6 +147,7 @@ class TestFormatEvent:
 # ============================================================================
 # Tests for _normalize_tool_result_content
 # ============================================================================
+
 
 class TestNormalizeToolResultContent:
     """Tests for _normalize_tool_result_content function."""
@@ -198,12 +207,15 @@ class TestNormalizeToolResultContent:
 # Tests for _convert_system_message
 # ============================================================================
 
+
 class TestConvertSystemMessage:
     """Tests for _convert_system_message function."""
 
     def test_convert_system_message_init_with_session_id_sse(self):
         """Test converting SystemMessage with init subtype and session_id (SSE)."""
-        msg = create_mock_system_message(subtype="init", data={"session_id": "test-session-123"})
+        msg = create_mock_system_message(
+            subtype="init", data={"session_id": "test-session-123"}
+        )
 
         result = _convert_system_message(msg, "sse")
 
@@ -213,7 +225,9 @@ class TestConvertSystemMessage:
 
     def test_convert_system_message_init_with_session_id_ws(self):
         """Test converting SystemMessage with init subtype and session_id (WS)."""
-        msg = create_mock_system_message(subtype="init", data={"session_id": "test-session-456"})
+        msg = create_mock_system_message(
+            subtype="init", data={"session_id": "test-session-456"}
+        )
 
         result = _convert_system_message(msg, "ws")
 
@@ -223,7 +237,9 @@ class TestConvertSystemMessage:
 
     def test_convert_system_message_non_init_subtype(self):
         """Test converting SystemMessage with non-init subtype."""
-        msg = create_mock_system_message(subtype="other", data={"session_id": "test-session"})
+        msg = create_mock_system_message(
+            subtype="other", data={"session_id": "test-session"}
+        )
 
         result = _convert_system_message(msg, "sse")
 
@@ -232,6 +248,7 @@ class TestConvertSystemMessage:
     def test_convert_system_message_no_data_attribute(self):
         """Test converting SystemMessage without data attribute."""
         from claude_agent_sdk.types import SystemMessage
+
         msg = MagicMock(spec=SystemMessage)
         msg.subtype = "init"
         # Simulate missing data attribute
@@ -251,7 +268,9 @@ class TestConvertSystemMessage:
 
     def test_convert_system_message_missing_session_id(self):
         """Test converting SystemMessage without session_id in data."""
-        msg = create_mock_system_message(subtype="init", data={"other_key": "other_value"})
+        msg = create_mock_system_message(
+            subtype="init", data={"other_key": "other_value"}
+        )
 
         result = _convert_system_message(msg, "ws")
 
@@ -261,6 +280,7 @@ class TestConvertSystemMessage:
 # ============================================================================
 # Tests for _convert_stream_event
 # ============================================================================
+
 
 class TestConvertStreamEvent:
     """Tests for _convert_stream_event function."""
@@ -309,7 +329,7 @@ class TestConvertStreamEvent:
             delta_type="tool_result",
             tool_use_id="tool-123",
             content="output",
-            is_error=False
+            is_error=False,
         )
 
         result = _convert_stream_event(msg, "sse")
@@ -325,7 +345,7 @@ class TestConvertStreamEvent:
             delta_type="tool_result",
             tool_use_id="tool-456",
             content="output",
-            is_error=True
+            is_error=True,
         )
 
         result = _convert_stream_event(msg, "ws")
@@ -339,9 +359,7 @@ class TestConvertStreamEvent:
     def test_convert_stream_event_tool_result_with_list_content(self):
         """Test converting StreamEvent with list content."""
         msg = create_mock_stream_event(
-            delta_type="tool_result",
-            tool_use_id="tool-789",
-            content=["line1", "line2"]
+            delta_type="tool_result", tool_use_id="tool-789", content=["line1", "line2"]
         )
 
         result = _convert_stream_event(msg, "ws")
@@ -351,9 +369,7 @@ class TestConvertStreamEvent:
     def test_convert_stream_event_tool_result_with_none_content(self):
         """Test converting StreamEvent with None content."""
         msg = create_mock_stream_event(
-            delta_type="tool_result",
-            tool_use_id="tool-000",
-            content=None
+            delta_type="tool_result", tool_use_id="tool-000", content=None
         )
 
         result = _convert_stream_event(msg, "ws")
@@ -371,6 +387,7 @@ class TestConvertStreamEvent:
     def test_convert_stream_event_empty_event(self):
         """Test converting StreamEvent with empty event."""
         from claude_agent_sdk.types import StreamEvent
+
         msg = MagicMock(spec=StreamEvent)
         msg.event = {}
 
@@ -381,6 +398,7 @@ class TestConvertStreamEvent:
     def test_convert_stream_event_no_delta(self):
         """Test converting StreamEvent without delta key."""
         from claude_agent_sdk.types import StreamEvent
+
         msg = MagicMock(spec=StreamEvent)
         msg.event = {"other_key": "value"}
 
@@ -393,15 +411,14 @@ class TestConvertStreamEvent:
 # Tests for _convert_tool_use_block
 # ============================================================================
 
+
 class TestConvertToolUseBlock:
     """Tests for _convert_tool_use_block function."""
 
     def test_convert_tool_use_block_sse(self):
         """Test converting ToolUseBlock (SSE)."""
         block = create_mock_tool_use_block(
-            block_id="tool-use-123",
-            name="bash",
-            input_data={"command": "ls -la"}
+            block_id="tool-use-123", name="bash", input_data={"command": "ls -la"}
         )
 
         result = _convert_tool_use_block(block, "sse")
@@ -415,7 +432,7 @@ class TestConvertToolUseBlock:
         block = create_mock_tool_use_block(
             block_id="tool-use-456",
             name="read",
-            input_data={"file_path": "/tmp/file.txt"}
+            input_data={"file_path": "/tmp/file.txt"},
         )
 
         result = _convert_tool_use_block(block, "ws")
@@ -428,9 +445,7 @@ class TestConvertToolUseBlock:
     def test_convert_tool_use_block_with_none_input(self):
         """Test converting ToolUseBlock with None input."""
         block = create_mock_tool_use_block(
-            block_id="tool-use-789",
-            name="test",
-            input_data=None
+            block_id="tool-use-789", name="test", input_data=None
         )
 
         result = _convert_tool_use_block(block, "ws")
@@ -442,15 +457,14 @@ class TestConvertToolUseBlock:
 # Tests for _convert_tool_result_block
 # ============================================================================
 
+
 class TestConvertToolResultBlock:
     """Tests for _convert_tool_result_block function."""
 
     def test_convert_tool_result_block_sse(self):
         """Test converting ToolResultBlock (SSE)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-use-123",
-            content="tool output",
-            is_error=False
+            tool_use_id="tool-use-123", content="tool output", is_error=False
         )
 
         result = _convert_tool_result_block(block, "sse")
@@ -462,9 +476,7 @@ class TestConvertToolResultBlock:
     def test_convert_tool_result_block_ws(self):
         """Test converting ToolResultBlock (WS)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-use-456",
-            content="tool output",
-            is_error=True
+            tool_use_id="tool-use-456", content="tool output", is_error=True
         )
 
         result = _convert_tool_result_block(block, "ws")
@@ -477,8 +489,7 @@ class TestConvertToolResultBlock:
     def test_convert_tool_result_block_with_list_content(self):
         """Test converting ToolResultBlock with list content."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-789",
-            content=["line1", "line2", "line3"]
+            tool_use_id="tool-789", content=["line1", "line2", "line3"]
         )
 
         result = _convert_tool_result_block(block, "ws")
@@ -487,10 +498,7 @@ class TestConvertToolResultBlock:
 
     def test_convert_tool_result_block_with_none_content(self):
         """Test converting ToolResultBlock with None content."""
-        block = create_mock_tool_result_block(
-            tool_use_id="tool-000",
-            content=None
-        )
+        block = create_mock_tool_result_block(tool_use_id="tool-000", content=None)
 
         result = _convert_tool_result_block(block, "ws")
 
@@ -499,6 +507,7 @@ class TestConvertToolResultBlock:
     def test_convert_tool_result_block_without_is_error_attribute(self):
         """Test converting ToolResultBlock without is_error attribute."""
         from claude_agent_sdk.types import ToolResultBlock
+
         block = MagicMock(spec=ToolResultBlock)
         block.tool_use_id = "tool-111"
         block.content = "output"
@@ -514,15 +523,14 @@ class TestConvertToolResultBlock:
 # Tests for _convert_assistant_message
 # ============================================================================
 
+
 class TestConvertAssistantMessage:
     """Tests for _convert_assistant_message function."""
 
     def test_convert_assistant_message_with_tool_use_sse(self):
         """Test converting AssistantMessage with ToolUseBlock (SSE)."""
         block = create_mock_tool_use_block(
-            block_id="tool-123",
-            name="bash",
-            input_data={"cmd": "ls"}
+            block_id="tool-123", name="bash", input_data={"cmd": "ls"}
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -535,9 +543,7 @@ class TestConvertAssistantMessage:
     def test_convert_assistant_message_with_tool_use_ws(self):
         """Test converting AssistantMessage with ToolUseBlock (WS)."""
         block = create_mock_tool_use_block(
-            block_id="tool-456",
-            name="read",
-            input_data={"path": "/tmp"}
+            block_id="tool-456", name="read", input_data={"path": "/tmp"}
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -551,9 +557,7 @@ class TestConvertAssistantMessage:
     def test_convert_assistant_message_with_tool_result_sse(self):
         """Test converting AssistantMessage with ToolResultBlock (SSE)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-789",
-            content="output",
-            is_error=False
+            tool_use_id="tool-789", content="output", is_error=False
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -566,9 +570,7 @@ class TestConvertAssistantMessage:
     def test_convert_assistant_message_with_tool_result_ws(self):
         """Test converting AssistantMessage with ToolResultBlock (WS)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-999",
-            content="error output",
-            is_error=True
+            tool_use_id="tool-999", content="error output", is_error=True
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -583,15 +585,11 @@ class TestConvertAssistantMessage:
     def test_convert_assistant_message_with_mixed_blocks(self):
         """Test converting AssistantMessage with mixed block types."""
         tool_use_block = create_mock_tool_use_block(
-            block_id="tool-123",
-            name="bash",
-            input_data={}
+            block_id="tool-123", name="bash", input_data={}
         )
 
         tool_result_block = create_mock_tool_result_block(
-            tool_use_id="tool-456",
-            content="output",
-            is_error=False
+            tool_use_id="tool-456", content="output", is_error=False
         )
 
         msg = create_mock_assistant_message(content=[tool_use_block, tool_result_block])
@@ -614,6 +612,7 @@ class TestConvertAssistantMessage:
 # ============================================================================
 # Tests for _convert_result_message
 # ============================================================================
+
 
 class TestConvertResultMessage:
     """Tests for _convert_result_message function."""
@@ -660,15 +659,14 @@ class TestConvertResultMessage:
 # Tests for _convert_user_message
 # ============================================================================
 
+
 class TestConvertUserMessage:
     """Tests for _convert_user_message function."""
 
     def test_convert_user_message_single_tool_result_sse(self):
         """Test converting UserMessage with single tool_result (SSE)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-123",
-            content="output",
-            is_error=False
+            tool_use_id="tool-123", content="output", is_error=False
         )
 
         msg = create_mock_user_message(content=[block])
@@ -681,9 +679,7 @@ class TestConvertUserMessage:
     def test_convert_user_message_single_tool_result_ws(self):
         """Test converting UserMessage with single tool_result (WS)."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-456",
-            content="output",
-            is_error=True
+            tool_use_id="tool-456", content="output", is_error=True
         )
 
         msg = create_mock_user_message(content=[block])
@@ -697,15 +693,11 @@ class TestConvertUserMessage:
     def test_convert_user_message_multiple_tool_results(self):
         """Test converting UserMessage with multiple tool_results."""
         block1 = create_mock_tool_result_block(
-            tool_use_id="tool-1",
-            content="output1",
-            is_error=False
+            tool_use_id="tool-1", content="output1", is_error=False
         )
 
         block2 = create_mock_tool_result_block(
-            tool_use_id="tool-2",
-            content="output2",
-            is_error=False
+            tool_use_id="tool-2", content="output2", is_error=False
         )
 
         msg = create_mock_user_message(content=[block1, block2])
@@ -729,15 +721,14 @@ class TestConvertUserMessage:
 # Tests for convert_messages
 # ============================================================================
 
+
 class TestConvertMessages:
     """Tests for convert_messages generator function."""
 
     def test_convert_messages_user_message(self):
         """Test convert_messages with UserMessage."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-123",
-            content="output",
-            is_error=False
+            tool_use_id="tool-123", content="output", is_error=False
         )
 
         msg = create_mock_user_message(content=[block])
@@ -750,15 +741,11 @@ class TestConvertMessages:
     def test_convert_messages_user_message_multiple_blocks(self):
         """Test convert_messages with UserMessage containing multiple blocks."""
         block1 = create_mock_tool_result_block(
-            tool_use_id="tool-1",
-            content="out1",
-            is_error=False
+            tool_use_id="tool-1", content="out1", is_error=False
         )
 
         block2 = create_mock_tool_result_block(
-            tool_use_id="tool-2",
-            content="out2",
-            is_error=False
+            tool_use_id="tool-2", content="out2", is_error=False
         )
 
         msg = create_mock_user_message(content=[block1, block2])
@@ -770,8 +757,7 @@ class TestConvertMessages:
     def test_convert_messages_system_message(self):
         """Test convert_messages with SystemMessage."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-123"}
+            subtype="init", data={"session_id": "sess-123"}
         )
 
         results = list(convert_messages(msg, "ws"))
@@ -781,10 +767,7 @@ class TestConvertMessages:
 
     def test_convert_messages_stream_event_text_delta(self):
         """Test convert_messages with StreamEvent text_delta."""
-        msg = create_mock_stream_event(
-            delta_type="text_delta",
-            text="Hello"
-        )
+        msg = create_mock_stream_event(delta_type="text_delta", text="Hello")
 
         results = list(convert_messages(msg, "sse"))
 
@@ -794,9 +777,7 @@ class TestConvertMessages:
     def test_convert_messages_stream_event_tool_result(self):
         """Test convert_messages with StreamEvent tool_result."""
         msg = create_mock_stream_event(
-            delta_type="tool_result",
-            tool_use_id="tool-123",
-            content="output"
+            delta_type="tool_result", tool_use_id="tool-123", content="output"
         )
 
         results = list(convert_messages(msg, "ws"))
@@ -807,9 +788,7 @@ class TestConvertMessages:
     def test_convert_messages_assistant_message_tool_use(self):
         """Test convert_messages with AssistantMessage tool_use."""
         block = create_mock_tool_use_block(
-            block_id="tool-456",
-            name="bash",
-            input_data={}
+            block_id="tool-456", name="bash", input_data={}
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -830,10 +809,7 @@ class TestConvertMessages:
 
     def test_convert_messages_system_message_no_session_id(self):
         """Test convert_messages with SystemMessage without session_id."""
-        msg = create_mock_system_message(
-            subtype="other",
-            data={}
-        )
+        msg = create_mock_system_message(subtype="other", data={})
 
         results = list(convert_messages(msg, "ws"))
 
@@ -870,6 +846,7 @@ class TestConvertMessages:
 # Tests for convert_message
 # ============================================================================
 
+
 class TestConvertMessage:
     """Tests for convert_message function."""
 
@@ -884,8 +861,7 @@ class TestConvertMessage:
     def test_convert_message_system_message_sse(self):
         """Test convert_message with SystemMessage (SSE)."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-123"}
+            subtype="init", data={"session_id": "sess-123"}
         )
 
         result = convert_message(msg, "sse")
@@ -896,8 +872,7 @@ class TestConvertMessage:
     def test_convert_message_system_message_ws(self):
         """Test convert_message with SystemMessage (WS)."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-456"}
+            subtype="init", data={"session_id": "sess-456"}
         )
 
         result = convert_message(msg, "ws")
@@ -907,10 +882,7 @@ class TestConvertMessage:
 
     def test_convert_message_stream_event(self):
         """Test convert_message with StreamEvent."""
-        msg = create_mock_stream_event(
-            delta_type="text_delta",
-            text="Hi"
-        )
+        msg = create_mock_stream_event(delta_type="text_delta", text="Hi")
 
         result = convert_message(msg, "sse")
 
@@ -920,9 +892,7 @@ class TestConvertMessage:
     def test_convert_message_assistant_message(self):
         """Test convert_message with AssistantMessage."""
         block = create_mock_tool_use_block(
-            block_id="tool-789",
-            name="bash",
-            input_data={}
+            block_id="tool-789", name="bash", input_data={}
         )
 
         msg = create_mock_assistant_message(content=[block])
@@ -943,10 +913,7 @@ class TestConvertMessage:
 
     def test_convert_message_system_message_invalid_returns_none(self):
         """Test convert_message with invalid SystemMessage returns None."""
-        msg = create_mock_system_message(
-            subtype="other",
-            data={}
-        )
+        msg = create_mock_system_message(subtype="other", data={})
 
         result = convert_message(msg, "sse")
 
@@ -967,14 +934,14 @@ class TestConvertMessage:
 # Tests for convert_message_to_sse
 # ============================================================================
 
+
 class TestConvertMessageToSse:
     """Tests for convert_message_to_sse function."""
 
     def test_convert_message_to_sse_system_message(self):
         """Test convert_message_to_sse with SystemMessage."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-sse"}
+            subtype="init", data={"session_id": "sess-sse"}
         )
 
         result = convert_message_to_sse(msg)
@@ -1004,14 +971,14 @@ class TestConvertMessageToSse:
 # Tests for message_to_dict
 # ============================================================================
 
+
 class TestMessageToDict:
     """Tests for message_to_dict function."""
 
     def test_message_to_dict_system_message(self):
         """Test message_to_dict with SystemMessage."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-dict"}
+            subtype="init", data={"session_id": "sess-dict"}
         )
 
         result = message_to_dict(msg)
@@ -1030,10 +997,7 @@ class TestMessageToDict:
 
     def test_message_to_dict_stream_event(self):
         """Test message_to_dict with StreamEvent."""
-        msg = create_mock_stream_event(
-            delta_type="text_delta",
-            text="test"
-        )
+        msg = create_mock_stream_event(delta_type="text_delta", text="test")
 
         result = message_to_dict(msg)
 
@@ -1056,15 +1020,14 @@ class TestMessageToDict:
 # Tests for message_to_dicts
 # ============================================================================
 
+
 class TestMessageToDicts:
     """Tests for message_to_dicts function."""
 
     def test_message_to_dicts_user_message_single_block(self):
         """Test message_to_dicts with UserMessage single block."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-dicts-1",
-            content="output",
-            is_error=False
+            tool_use_id="tool-dicts-1", content="output", is_error=False
         )
 
         msg = create_mock_user_message(content=[block])
@@ -1078,15 +1041,11 @@ class TestMessageToDicts:
     def test_message_to_dicts_user_message_multiple_blocks(self):
         """Test message_to_dicts with UserMessage multiple blocks."""
         block1 = create_mock_tool_result_block(
-            tool_use_id="tool-dicts-2",
-            content="out1",
-            is_error=False
+            tool_use_id="tool-dicts-2", content="out1", is_error=False
         )
 
         block2 = create_mock_tool_result_block(
-            tool_use_id="tool-dicts-3",
-            content="out2",
-            is_error=False
+            tool_use_id="tool-dicts-3", content="out2", is_error=False
         )
 
         msg = create_mock_user_message(content=[block1, block2])
@@ -1100,8 +1059,7 @@ class TestMessageToDicts:
     def test_message_to_dicts_system_message(self):
         """Test message_to_dicts with SystemMessage."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-dicts-multi"}
+            subtype="init", data={"session_id": "sess-dicts-multi"}
         )
 
         results = message_to_dicts(msg)
@@ -1111,10 +1069,7 @@ class TestMessageToDicts:
 
     def test_message_to_dicts_stream_event(self):
         """Test message_to_dicts with StreamEvent."""
-        msg = create_mock_stream_event(
-            delta_type="text_delta",
-            text="text"
-        )
+        msg = create_mock_stream_event(delta_type="text_delta", text="text")
 
         results = message_to_dicts(msg)
 
@@ -1135,15 +1090,14 @@ class TestMessageToDicts:
 # Tests for convert_messages_to_sse
 # ============================================================================
 
+
 class TestConvertMessagesToSse:
     """Tests for convert_messages_to_sse function."""
 
     def test_convert_messages_to_sse_user_message(self):
         """Test convert_messages_to_sse with UserMessage."""
         block = create_mock_tool_result_block(
-            tool_use_id="tool-sse-1",
-            content="output",
-            is_error=False
+            tool_use_id="tool-sse-1", content="output", is_error=False
         )
 
         msg = create_mock_user_message(content=[block])
@@ -1156,15 +1110,11 @@ class TestConvertMessagesToSse:
     def test_convert_messages_to_sse_user_message_multiple(self):
         """Test convert_messages_to_sse with UserMessage multiple blocks."""
         block1 = create_mock_tool_result_block(
-            tool_use_id="tool-sse-2",
-            content="out1",
-            is_error=False
+            tool_use_id="tool-sse-2", content="out1", is_error=False
         )
 
         block2 = create_mock_tool_result_block(
-            tool_use_id="tool-sse-3",
-            content="out2",
-            is_error=False
+            tool_use_id="tool-sse-3", content="out2", is_error=False
         )
 
         msg = create_mock_user_message(content=[block1, block2])
@@ -1176,8 +1126,7 @@ class TestConvertMessagesToSse:
     def test_convert_messages_to_sse_system_message(self):
         """Test convert_messages_to_sse with SystemMessage."""
         msg = create_mock_system_message(
-            subtype="init",
-            data={"session_id": "sess-sse-multi"}
+            subtype="init", data={"session_id": "sess-sse-multi"}
         )
 
         results = convert_messages_to_sse(msg)
@@ -1187,10 +1136,7 @@ class TestConvertMessagesToSse:
 
     def test_convert_messages_to_sse_stream_event(self):
         """Test convert_messages_to_sse with StreamEvent."""
-        msg = create_mock_stream_event(
-            delta_type="text_delta",
-            text="delta"
-        )
+        msg = create_mock_stream_event(delta_type="text_delta", text="delta")
 
         results = convert_messages_to_sse(msg)
 

@@ -1,4 +1,5 @@
 """Tests for API error exceptions."""
+
 import pytest
 
 from api.core.errors import (
@@ -17,7 +18,7 @@ class TestAPIError:
         error = APIError(
             status_code=500,
             message="Internal server error",
-            details={"trace_id": "abc123"}
+            details={"trace_id": "abc123"},
         )
 
         assert error.status_code == 500
@@ -84,10 +85,10 @@ class TestAPIError:
         details = {
             "errors": [
                 {"field": "email", "message": "Invalid email format"},
-                {"field": "age", "message": "Must be positive"}
+                {"field": "age", "message": "Must be positive"},
             ],
             "request_id": "req-123",
-            "timestamp": "2024-01-01T00:00:00Z"
+            "timestamp": "2024-01-01T00:00:00Z",
         }
 
         error = APIError(status_code=422, message="Validation failed", details=details)
@@ -111,10 +112,7 @@ class TestSessionNotFoundError:
     def test_construction_with_details(self):
         """Test constructing SessionNotFoundError with details."""
         details = {"hint": "Session may have expired"}
-        error = SessionNotFoundError(
-            session_id="session-xyz-789",
-            details=details
-        )
+        error = SessionNotFoundError(session_id="session-xyz-789", details=details)
 
         assert error.status_code == 404
         assert error.session_id == "session-xyz-789"
@@ -172,24 +170,25 @@ class TestSessionStateError:
 
     def test_construction_with_session_id_and_state(self):
         """Test constructing SessionStateError with session_id and state."""
-        error = SessionStateError(
-            session_id="session-123",
-            state="completed"
-        )
+        error = SessionStateError(session_id="session-123", state="completed")
 
         assert error.status_code == 409
         assert error.session_id == "session-123"
         assert error.state == "completed"
-        assert error.message == "Session 'session-123' is in invalid state 'completed' for this operation"
+        assert (
+            error.message
+            == "Session 'session-123' is in invalid state 'completed' for this operation"
+        )
         assert error.details == {}
 
     def test_construction_with_details(self):
         """Test constructing SessionStateError with details."""
-        details = {"current_state": "completed", "allowed_states": ["pending", "active"]}
+        details = {
+            "current_state": "completed",
+            "allowed_states": ["pending", "active"],
+        }
         error = SessionStateError(
-            session_id="session-456",
-            state="completed",
-            details=details
+            session_id="session-456", state="completed", details=details
         )
 
         assert error.status_code == 409
@@ -202,8 +201,14 @@ class TestSessionStateError:
         error1 = SessionStateError(session_id="s1", state="active")
         error2 = SessionStateError(session_id="s2", state="terminated")
 
-        assert error1.message == "Session 's1' is in invalid state 'active' for this operation"
-        assert error2.message == "Session 's2' is in invalid state 'terminated' for this operation"
+        assert (
+            error1.message
+            == "Session 's1' is in invalid state 'active' for this operation"
+        )
+        assert (
+            error2.message
+            == "Session 's2' is in invalid state 'terminated' for this operation"
+        )
 
     def test_inheritance_from_api_error(self):
         """Test that SessionStateError is an APIError subclass."""
@@ -263,10 +268,7 @@ class TestInvalidRequestError:
     def test_construction_with_details(self):
         """Test constructing InvalidRequestError with details."""
         details = {"field": "email", "reason": "Invalid format"}
-        error = InvalidRequestError(
-            message="Validation failed",
-            details=details
-        )
+        error = InvalidRequestError(message="Validation failed", details=details)
 
         assert error.status_code == 400
         assert error.message == "Validation failed"
@@ -303,7 +305,7 @@ class TestInvalidRequestError:
             "Missing required field",
             "Invalid JSON format",
             "Parameter out of range",
-            "Authentication required"
+            "Authentication required",
         ]
 
         for message in messages:
@@ -315,14 +317,13 @@ class TestInvalidRequestError:
         details = {
             "validation_errors": {
                 "email": ["Invalid format", "Already registered"],
-                "password": ["Too short", "Missing uppercase letter"]
+                "password": ["Too short", "Missing uppercase letter"],
             },
-            "fields_count": 2
+            "fields_count": 2,
         }
 
         error = InvalidRequestError(
-            message="Multiple validation errors",
-            details=details
+            message="Multiple validation errors", details=details
         )
 
         assert error.details == details
@@ -410,35 +411,34 @@ class TestExceptionInRealWorldScenarios:
         """Test extracting error information for logging purposes."""
         error = SessionNotFoundError(
             session_id="session-123",
-            details={"user": "john", "timestamp": "2024-01-01"}
+            details={"user": "john", "timestamp": "2024-01-01"},
         )
 
         log_info = {
             "status_code": error.status_code,
             "message": error.message,
             "session_id": error.session_id,
-            "details": error.details
+            "details": error.details,
         }
 
         assert log_info == {
             "status_code": 404,
             "message": "Session 'session-123' not found",
             "session_id": "session-123",
-            "details": {"user": "john", "timestamp": "2024-01-01"}
+            "details": {"user": "john", "timestamp": "2024-01-01"},
         }
 
     def test_api_response_format(self):
         """Test formatting error for API response."""
         error = InvalidRequestError(
-            message="Validation failed",
-            details={"fields": ["email", "password"]}
+            message="Validation failed", details={"fields": ["email", "password"]}
         )
 
         response = {
             "error": {
                 "code": error.status_code,
                 "message": error.message,
-                "details": error.details
+                "details": error.details,
             }
         }
 
@@ -446,7 +446,7 @@ class TestExceptionInRealWorldScenarios:
             "error": {
                 "code": 400,
                 "message": "Validation failed",
-                "details": {"fields": ["email", "password"]}
+                "details": {"fields": ["email", "password"]},
             }
         }
 

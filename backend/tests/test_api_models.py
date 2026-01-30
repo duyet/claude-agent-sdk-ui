@@ -14,8 +14,7 @@ Run: pytest tests/test_api_models.py -v
 """
 
 import pytest
-from pydantic import ValidationError, BaseModel
-from datetime import datetime
+from pydantic import ValidationError
 
 from api.models.requests import (
     CreateSessionRequest,
@@ -55,10 +54,7 @@ class TestCreateSessionRequest:
 
     def test_create_with_all_fields(self):
         """Test creating request with all optional fields provided."""
-        data = {
-            "agent_id": "agent-123",
-            "resume_session_id": "session-456"
-        }
+        data = {"agent_id": "agent-123", "resume_session_id": "session-456"}
         request = CreateSessionRequest(**data)
 
         assert request.agent_id == "agent-123"
@@ -182,7 +178,7 @@ class TestCreateConversationRequest:
             "content": "Hello",
             "session_id": "sess-123",
             "agent_id": "agent-456",
-            "resume_session_id": "sess-789"
+            "resume_session_id": "sess-789",
         }
         request = CreateConversationRequest(**data)
 
@@ -207,9 +203,7 @@ class TestCreateConversationRequest:
     def test_mutual_exclusivity_session_vs_resume(self):
         """Note: Model doesn't enforce mutual exclusivity, both can be set."""
         request = CreateConversationRequest(
-            content="Test",
-            session_id="sess-1",
-            resume_session_id="sess-2"
+            content="Test", session_id="sess-1", resume_session_id="sess-2"
         )
         # This is valid per the model - app layer handles logic
         assert request.session_id == "sess-1"
@@ -279,9 +273,7 @@ class TestBatchDeleteSessionsRequest:
 
     def test_create_with_session_ids(self):
         """Test creating with session IDs."""
-        request = BatchDeleteSessionsRequest(
-            session_ids=["sess-1", "sess-2", "sess-3"]
-        )
+        request = BatchDeleteSessionsRequest(session_ids=["sess-1", "sess-2", "sess-3"])
 
         assert request.session_ids == ["sess-1", "sess-2", "sess-3"]
 
@@ -319,11 +311,7 @@ class TestSessionResponse:
 
     def test_create_with_all_fields(self):
         """Test creating with all fields."""
-        response = SessionResponse(
-            session_id="sess-123",
-            status="active",
-            resumed=True
-        )
+        response = SessionResponse(session_id="sess-123", status="active", resumed=True)
 
         assert response.session_id == "sess-123"
         assert response.status == "active"
@@ -331,10 +319,7 @@ class TestSessionResponse:
 
     def test_default_resumed_value(self):
         """Test that resumed defaults to False."""
-        response = SessionResponse(
-            session_id="sess-123",
-            status="active"
-        )
+        response = SessionResponse(session_id="sess-123", status="active")
 
         assert response.resumed is False
 
@@ -359,18 +344,12 @@ class TestSessionResponse:
         statuses = ["active", "pending", "closed", "error", "initializing"]
 
         for status in statuses:
-            response = SessionResponse(
-                session_id="sess-123",
-                status=status
-            )
+            response = SessionResponse(session_id="sess-123", status=status)
             assert response.status == status
 
     def test_serialization_includes_defaults(self):
         """Test serialization includes default values."""
-        response = SessionResponse(
-            session_id="sess-123",
-            status="active"
-        )
+        response = SessionResponse(session_id="sess-123", status="active")
         data = response.model_dump()
 
         assert "resumed" in data
@@ -389,7 +368,7 @@ class TestSessionInfo:
             created_at="2024-01-15T10:30:00Z",
             turn_count=5,
             user_id="user-456",
-            agent_id="agent-789"
+            agent_id="agent-789",
         )
 
         assert response.session_id == "sess-123"
@@ -403,9 +382,7 @@ class TestSessionInfo:
     def test_optional_fields_default_to_none(self):
         """Test that optional fields default to None."""
         response = SessionInfo(
-            session_id="sess-123",
-            created_at="2024-01-15T10:30:00Z",
-            turn_count=0
+            session_id="sess-123", created_at="2024-01-15T10:30:00Z", turn_count=0
         )
 
         assert response.name is None
@@ -417,18 +394,14 @@ class TestSessionInfo:
         """Test turn_count minimum constraint (ge=0)."""
         # Valid: 0
         response = SessionInfo(
-            session_id="sess-123",
-            created_at="2024-01-15T10:30:00Z",
-            turn_count=0
+            session_id="sess-123", created_at="2024-01-15T10:30:00Z", turn_count=0
         )
         assert response.turn_count == 0
 
         # Invalid: -1
         with pytest.raises(ValidationError) as exc_info:
             SessionInfo(
-                session_id="sess-123",
-                created_at="2024-01-15T10:30:00Z",
-                turn_count=-1
+                session_id="sess-123", created_at="2024-01-15T10:30:00Z", turn_count=-1
             )
 
         errors = exc_info.value.errors()
@@ -437,9 +410,7 @@ class TestSessionInfo:
     def test_turn_count_can_be_large(self):
         """Test turn_count with large value."""
         response = SessionInfo(
-            session_id="sess-123",
-            created_at="2024-01-15T10:30:00Z",
-            turn_count=1000000
+            session_id="sess-123", created_at="2024-01-15T10:30:00Z", turn_count=1000000
         )
         assert response.turn_count == 1000000
 
@@ -447,24 +418,15 @@ class TestSessionInfo:
         """Test that required fields are validated."""
         # Missing session_id
         with pytest.raises(ValidationError):
-            SessionInfo(
-                created_at="2024-01-15T10:30:00Z",
-                turn_count=0
-            )
+            SessionInfo(created_at="2024-01-15T10:30:00Z", turn_count=0)
 
         # Missing created_at
         with pytest.raises(ValidationError):
-            SessionInfo(
-                session_id="sess-123",
-                turn_count=0
-            )
+            SessionInfo(session_id="sess-123", turn_count=0)
 
         # Missing turn_count
         with pytest.raises(ValidationError):
-            SessionInfo(
-                session_id="sess-123",
-                created_at="2024-01-15T10:30:00Z"
-            )
+            SessionInfo(session_id="sess-123", created_at="2024-01-15T10:30:00Z")
 
 
 class TestErrorResponse:
@@ -472,10 +434,7 @@ class TestErrorResponse:
 
     def test_create_with_all_fields(self):
         """Test creating with all fields."""
-        response = ErrorResponse(
-            error="ValidationError",
-            detail="Invalid input data"
-        )
+        response = ErrorResponse(error="ValidationError", detail="Invalid input data")
 
         assert response.error == "ValidationError"
         assert response.detail == "Invalid input data"
@@ -498,8 +457,7 @@ class TestErrorResponse:
     def test_detail_can_be_any_string(self):
         """Test that detail accepts any string."""
         response = ErrorResponse(
-            error="CustomError",
-            detail="Long detailed error message with unicode: 世界"
+            error="CustomError", detail="Long detailed error message with unicode: 世界"
         )
 
         assert response.detail == "Long detailed error message with unicode: 世界"
@@ -512,7 +470,7 @@ class TestErrorResponse:
             "NotFoundError",
             "PermissionError",
             "RateLimitError",
-            "InternalServerError"
+            "InternalServerError",
         ]
 
         for error_type in error_types:
@@ -576,14 +534,14 @@ class TestSessionHistoryResponse:
         """Test creating with all fields."""
         messages = [
             {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there"}
+            {"role": "assistant", "content": "Hi there"},
         ]
 
         response = SessionHistoryResponse(
             session_id="sess-123",
             messages=messages,
             turn_count=2,
-            first_message="Hello"
+            first_message="Hello",
         )
 
         assert response.session_id == "sess-123"
@@ -593,59 +551,40 @@ class TestSessionHistoryResponse:
 
     def test_default_messages(self):
         """Test that messages defaults to empty list."""
-        response = SessionHistoryResponse(
-            session_id="sess-123",
-            turn_count=0
-        )
+        response = SessionHistoryResponse(session_id="sess-123", turn_count=0)
 
         assert response.messages == []
         assert isinstance(response.messages, list)
 
     def test_default_turn_count(self):
         """Test that turn_count defaults to 0."""
-        response = SessionHistoryResponse(
-            session_id="sess-123"
-        )
+        response = SessionHistoryResponse(session_id="sess-123")
 
         assert response.turn_count == 0
 
     def test_default_first_message(self):
         """Test that first_message defaults to None."""
-        response = SessionHistoryResponse(
-            session_id="sess-123"
-        )
+        response = SessionHistoryResponse(session_id="sess-123")
 
         assert response.first_message is None
 
     def test_turn_count_minimum(self):
         """Test turn_count minimum constraint."""
-        response = SessionHistoryResponse(
-            session_id="sess-123",
-            turn_count=0
-        )
+        response = SessionHistoryResponse(session_id="sess-123", turn_count=0)
         assert response.turn_count == 0
 
         with pytest.raises(ValidationError):
-            SessionHistoryResponse(
-                session_id="sess-123",
-                turn_count=-1
-            )
+            SessionHistoryResponse(session_id="sess-123", turn_count=-1)
 
     def test_messages_accepts_various_types(self):
         """Test that messages accepts various list contents."""
         # Empty list
-        response = SessionHistoryResponse(
-            session_id="sess-123",
-            messages=[]
-        )
+        response = SessionHistoryResponse(session_id="sess-123", messages=[])
         assert response.messages == []
 
         # List with dicts
         messages = [{"role": "user", "content": "test"}]
-        response = SessionHistoryResponse(
-            session_id="sess-123",
-            messages=messages
-        )
+        response = SessionHistoryResponse(session_id="sess-123", messages=messages)
         assert response.messages == messages
 
     def test_session_id_required(self):
@@ -680,7 +619,7 @@ class TestWsTokenRequest:
             "with.dots",
             "UPPERCASE",
             "12345",
-            "complex-key_123.abc"
+            "complex-key_123.abc",
         ]
 
         for key in keys:
@@ -709,7 +648,7 @@ class TestTokenPayload:
             exp=now + 1800,
             iat=now,
             iss="claude-agent-sdk",
-            aud="claude-agent-sdk-users"
+            aud="claude-agent-sdk-users",
         )
 
         assert payload.sub == "user-123"
@@ -732,7 +671,7 @@ class TestTokenPayload:
                 "exp": 1705339200,
                 "iat": 1705339200,
                 "iss": "issuer",
-                "aud": "audience"
+                "aud": "audience",
             }
             del data[field]
 
@@ -752,7 +691,7 @@ class TestTokenPayload:
                 exp="not-an-int",  # Invalid
                 iat=1705339200,
                 iss="issuer",
-                aud="audience"
+                aud="audience",
             )
 
     def test_iat_must_be_int(self):
@@ -765,7 +704,7 @@ class TestTokenPayload:
                 exp=1705339200,
                 iat="not-an-int",  # Invalid
                 iss="issuer",
-                aud="audience"
+                aud="audience",
             )
 
     def test_token_type_values(self):
@@ -780,7 +719,7 @@ class TestTokenPayload:
                 exp=1705339200,
                 iat=1705339200,
                 iss="issuer",
-                aud="audience"
+                aud="audience",
             )
             assert payload.type == token_type
 
@@ -795,7 +734,7 @@ class TestTokenResponse:
             refresh_token="refresh-456",
             token_type="bearer",
             expires_in=1800,
-            user_id="user-789"
+            user_id="user-789",
         )
 
         assert response.access_token == "access-123"
@@ -810,7 +749,7 @@ class TestTokenResponse:
             access_token="access-123",
             refresh_token="refresh-456",
             expires_in=1800,
-            user_id="user-789"
+            user_id="user-789",
         )
 
         assert response.token_type == "bearer"
@@ -824,7 +763,7 @@ class TestTokenResponse:
                 "access_token": "access-123",
                 "refresh_token": "refresh-456",
                 "expires_in": 1800,
-                "user_id": "user-789"
+                "user_id": "user-789",
             }
             del data[field]
 
@@ -841,7 +780,7 @@ class TestTokenResponse:
                 access_token="access-123",
                 refresh_token="refresh-456",
                 expires_in="not-an-int",
-                user_id="user-789"
+                user_id="user-789",
             )
 
     def test_various_token_types(self):
@@ -854,7 +793,7 @@ class TestTokenResponse:
                 refresh_token="refresh-456",
                 token_type=token_type,
                 expires_in=1800,
-                user_id="user-789"
+                user_id="user-789",
             )
             assert response.token_type == token_type
 
@@ -889,10 +828,7 @@ class TestLoginRequest:
 
     def test_create_with_username_and_password(self):
         """Test creating with username and password."""
-        request = LoginRequest(
-            username="testuser",
-            password="secretpass123"
-        )
+        request = LoginRequest(username="testuser", password="secretpass123")
 
         assert request.username == "testuser"
         assert request.password == "secretpass123"
@@ -920,10 +856,7 @@ class TestLoginRequest:
 
     def test_username_can_be_email(self):
         """Test username as email format."""
-        request = LoginRequest(
-            username="user@example.com",
-            password="pass123"
-        )
+        request = LoginRequest(username="user@example.com", password="pass123")
 
         assert request.username == "user@example.com"
 
@@ -936,14 +869,11 @@ class TestLoginRequest:
             "user.name",
             "123user",
             "USER",
-            "user@example.com"
+            "user@example.com",
         ]
 
         for username in usernames:
-            request = LoginRequest(
-                username=username,
-                password="pass123"
-            )
+            request = LoginRequest(username=username, password="pass123")
             assert request.username == username
 
     def test_password_with_special_chars(self):
@@ -954,14 +884,11 @@ class TestLoginRequest:
             "with!@#$special",
             "with spaces",
             "混合Mixed字符 Characters",
-            "very" * 50  # Long password
+            "very" * 50,  # Long password
         ]
 
         for password in passwords:
-            request = LoginRequest(
-                username="user",
-                password=password
-            )
+            request = LoginRequest(username="user", password=password)
             assert request.password == password
 
 
@@ -971,10 +898,7 @@ class TestUserInfo:
     def test_create_with_all_fields(self):
         """Test creating with all fields."""
         user = UserInfo(
-            id="user-123",
-            username="testuser",
-            full_name="Test User",
-            role="admin"
+            id="user-123", username="testuser", full_name="Test User", role="admin"
         )
 
         assert user.id == "user-123"
@@ -984,12 +908,7 @@ class TestUserInfo:
 
     def test_create_with_optional_full_name(self):
         """Test creating without full_name."""
-        user = UserInfo(
-            id="user-123",
-            username="testuser",
-            full_name=None,
-            role="user"
-        )
+        user = UserInfo(id="user-123", username="testuser", full_name=None, role="user")
 
         assert user.full_name is None
 
@@ -997,24 +916,15 @@ class TestUserInfo:
         """Test that id, username, and role are required."""
         # Missing id
         with pytest.raises(ValidationError):
-            UserInfo(
-                username="user",
-                role="user"
-            )
+            UserInfo(username="user", role="user")
 
         # Missing username
         with pytest.raises(ValidationError):
-            UserInfo(
-                id="user-123",
-                role="user"
-            )
+            UserInfo(id="user-123", role="user")
 
         # Missing role
         with pytest.raises(ValidationError):
-            UserInfo(
-                id="user-123",
-                username="user"
-            )
+            UserInfo(id="user-123", username="user")
 
     def test_role_literal_validation_admin(self):
         """Test role with 'admin' value."""
@@ -1022,7 +932,7 @@ class TestUserInfo:
             id="user-123",
             username="admin",
             full_name=None,  # Must provide since it's optional
-            role="admin"
+            role="admin",
         )
         assert user.role == "admin"
 
@@ -1032,7 +942,7 @@ class TestUserInfo:
             id="user-123",
             username="regularuser",
             full_name=None,  # Must provide since it's optional
-            role="user"
+            role="user",
         )
         assert user.role == "user"
 
@@ -1042,7 +952,7 @@ class TestUserInfo:
             UserInfo(
                 id="user-123",
                 username="user",
-                role="superadmin"  # Invalid
+                role="superadmin",  # Invalid
             )
 
         errors = exc_info.value.errors()
@@ -1050,12 +960,7 @@ class TestUserInfo:
 
     def test_full_name_can_be_empty_string(self):
         """Test that full_name can be empty string."""
-        user = UserInfo(
-            id="user-123",
-            username="user",
-            full_name="",
-            role="user"
-        )
+        user = UserInfo(id="user-123", username="user", full_name="", role="user")
         assert user.full_name == ""
 
 
@@ -1065,10 +970,7 @@ class TestLoginResponse:
     def test_create_successful_login(self):
         """Test creating successful login response."""
         user_info = UserInfo(
-            id="user-123",
-            username="testuser",
-            full_name="Test User",
-            role="user"
+            id="user-123", username="testuser", full_name="Test User", role="user"
         )
 
         response = LoginResponse(
@@ -1076,7 +978,7 @@ class TestLoginResponse:
             token="jwt-token-123",
             refresh_token="refresh-token-456",
             user=user_info,
-            error=None
+            error=None,
         )
 
         assert response.success is True
@@ -1092,7 +994,7 @@ class TestLoginResponse:
             token=None,
             refresh_token=None,
             user=None,
-            error="Invalid credentials"
+            error="Invalid credentials",
         )
 
         assert response.success is False
@@ -1104,11 +1006,7 @@ class TestLoginResponse:
     def test_success_required(self):
         """Test that success is required."""
         with pytest.raises(ValidationError) as exc_info:
-            LoginResponse(
-                token="token",
-                user=None,
-                error=None
-            )
+            LoginResponse(token="token", user=None, error=None)
 
         errors = exc_info.value.errors()
         assert any(e["loc"] == ("success",) for e in errors)
@@ -1125,28 +1023,17 @@ class TestLoginResponse:
     def test_success_true_without_token_is_valid(self):
         """Test that success=True without token is model-valid (app-level logic)."""
         # Model doesn't enforce that success=True requires token
-        response = LoginResponse(
-            success=True,
-            token=None,
-            user=None
-        )
+        response = LoginResponse(success=True, token=None, user=None)
         assert response.success is True
         assert response.token is None
 
     def test_user_info_serialization(self):
         """Test serialization with UserInfo nested."""
         user_info = UserInfo(
-            id="user-123",
-            username="testuser",
-            full_name="Test User",
-            role="admin"
+            id="user-123", username="testuser", full_name="Test User", role="admin"
         )
 
-        response = LoginResponse(
-            success=True,
-            token="token-123",
-            user=user_info
-        )
+        response = LoginResponse(success=True, token="token-123", user=user_info)
 
         data = response.model_dump()
 
@@ -1161,9 +1048,7 @@ class TestUserTokenPayload:
     def test_create_with_all_fields(self):
         """Test creating with all fields."""
         payload = UserTokenPayload(
-            user_id="user-123",
-            username="testuser",
-            role="admin"
+            user_id="user-123", username="testuser", role="admin"
         )
 
         assert payload.user_id == "user-123"
@@ -1175,11 +1060,7 @@ class TestUserTokenPayload:
         required_fields = ["user_id", "username", "role"]
 
         for field in required_fields:
-            data = {
-                "user_id": "user-123",
-                "username": "testuser",
-                "role": "user"
-            }
+            data = {"user_id": "user-123", "username": "testuser", "role": "user"}
             del data[field]
 
             with pytest.raises(ValidationError) as exc_info:
@@ -1190,19 +1071,13 @@ class TestUserTokenPayload:
 
     def test_role_literal_admin(self):
         """Test role with 'admin' value."""
-        payload = UserTokenPayload(
-            user_id="user-123",
-            username="admin",
-            role="admin"
-        )
+        payload = UserTokenPayload(user_id="user-123", username="admin", role="admin")
         assert payload.role == "admin"
 
     def test_role_literal_user(self):
         """Test role with 'user' value."""
         payload = UserTokenPayload(
-            user_id="user-123",
-            username="regularuser",
-            role="user"
+            user_id="user-123", username="regularuser", role="user"
         )
         assert payload.role == "user"
 
@@ -1212,7 +1087,7 @@ class TestUserTokenPayload:
             UserTokenPayload(
                 user_id="user-123",
                 username="user",
-                role="superuser"  # Invalid
+                role="superuser",  # Invalid
             )
 
         errors = exc_info.value.errors()
@@ -1221,9 +1096,7 @@ class TestUserTokenPayload:
     def test_username_can_be_email(self):
         """Test username as email."""
         payload = UserTokenPayload(
-            user_id="user-123",
-            username="user@example.com",
-            role="user"
+            user_id="user-123", username="user@example.com", role="user"
         )
         assert payload.username == "user@example.com"
 
@@ -1251,17 +1124,14 @@ class TestModelEdgeCases:
 
     def test_model_dump_mode_python_vs_json(self):
         """Test model_dump with different modes."""
-        response = SessionResponse(
-            session_id="sess-123",
-            status="active"
-        )
+        response = SessionResponse(session_id="sess-123", status="active")
 
         # Python mode (default)
-        data_python = response.model_dump(mode='python')
+        data_python = response.model_dump(mode="python")
         assert isinstance(data_python, dict)
 
         # JSON mode
-        data_json = response.model_dump(mode='json')
+        data_json = response.model_dump(mode="json")
         assert isinstance(data_json, dict)
 
     def test_model_validation_context(self):
@@ -1290,17 +1160,10 @@ class TestModelEdgeCases:
     def test_deep_nested_serialization(self):
         """Test serialization of nested models."""
         user = UserInfo(
-            id="user-123",
-            username="testuser",
-            full_name="Test User",
-            role="admin"
+            id="user-123", username="testuser", full_name="Test User", role="admin"
         )
 
-        response = LoginResponse(
-            success=True,
-            token="token-123",
-            user=user
-        )
+        response = LoginResponse(success=True, token="token-123", user=user)
 
         # Deep serialization
         json_str = response.model_dump_json()
@@ -1310,10 +1173,7 @@ class TestModelEdgeCases:
     def test_list_field_mutation(self):
         """Test that list fields can be mutated after creation."""
         messages = [{"role": "user"}]
-        response = SessionHistoryResponse(
-            session_id="sess-123",
-            messages=messages
-        )
+        response = SessionHistoryResponse(session_id="sess-123", messages=messages)
 
         # Mutate the list
         response.messages.append({"role": "assistant"})
@@ -1334,7 +1194,7 @@ class TestModelEdgeCases:
         response = SessionInfo(
             session_id="sess-123",
             created_at="2024-01-15T10:30:00Z",
-            turn_count="5"  # str that looks like int
+            turn_count="5",  # str that looks like int
         )
         assert response.turn_count == 5
         assert isinstance(response.turn_count, int)
@@ -1345,7 +1205,7 @@ class TestModelEdgeCases:
         # Extra fields are silently ignored
         request = SendMessageRequest(
             content="test",
-            extra_field="not_allowed"  # Will be ignored
+            extra_field="not_allowed",  # Will be ignored
         )
         assert request.content == "test"
         assert not hasattr(request, "extra_field")
@@ -1381,7 +1241,7 @@ class TestTypeCoercionAndValidation:
         response = SessionInfo(
             session_id="sess-123",
             created_at="2024-01-15T10:30:00Z",
-            turn_count="5"  # Coerced to int
+            turn_count="5",  # Coerced to int
         )
         assert response.turn_count == 5
 
@@ -1390,7 +1250,7 @@ class TestTypeCoercionAndValidation:
             SessionInfo(
                 session_id="sess-123",
                 created_at="2024-01-15T10:30:00Z",
-                turn_count="five"  # Not numeric
+                turn_count="five",  # Not numeric
             )
 
     def test_float_to_int_validation_error(self):
@@ -1399,7 +1259,7 @@ class TestTypeCoercionAndValidation:
             SessionInfo(
                 session_id="sess-123",
                 created_at="2024-01-15T10:30:00Z",
-                turn_count=5.5  # Float instead of int
+                turn_count=5.5,  # Float instead of int
             )
 
     def test_bool_to_int_validation_error(self):
@@ -1411,7 +1271,7 @@ class TestTypeCoercionAndValidation:
         response = SessionInfo(
             session_id="sess-123",
             created_at="2024-01-15T10:30:00Z",
-            turn_count=True  # Coerced to 1
+            turn_count=True,  # Coerced to 1
         )
         assert response.turn_count == 1
 
@@ -1437,19 +1297,9 @@ class TestTypeCoercionAndValidation:
     def test_literal_type_validation(self):
         """Test Literal type validation."""
         # Valid values
-        UserInfo(
-            id="user-123",
-            username="user",
-            full_name=None,
-            role="user"
-        )
+        UserInfo(id="user-123", username="user", full_name=None, role="user")
 
-        UserInfo(
-            id="user-123",
-            username="admin",
-            full_name=None,
-            role="admin"
-        )
+        UserInfo(id="user-123", username="admin", full_name=None, role="admin")
 
         # Invalid value
         with pytest.raises(ValidationError):
@@ -1457,7 +1307,7 @@ class TestTypeCoercionAndValidation:
                 id="user-123",
                 username="user",
                 full_name=None,
-                role="superadmin"  # Not in Literal
+                role="superadmin",  # Not in Literal
             )
 
 

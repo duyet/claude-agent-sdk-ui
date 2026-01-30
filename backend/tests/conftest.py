@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for backend tests.
 """
+
 import os
 from pathlib import Path
 import pytest
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 
 # Load .env file from backend directory
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 # Set a test API key before importing app (only if not already set in .env)

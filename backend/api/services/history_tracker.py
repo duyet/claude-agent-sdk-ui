@@ -20,10 +20,10 @@ class HistoryTracker:
 
     Attributes:
         session_id: The session ID to track history for.
-        history: The HistoryStorage instance for persistence.
+        history: The HistoryStorage instance for persistence, or None if no history tracking.
     """
     session_id: str
-    history: HistoryStorage
+    history: HistoryStorage | None
     _text_parts: list[str] = field(default_factory=list)
 
     def save_user_message(self, content: str) -> None:
@@ -32,11 +32,12 @@ class HistoryTracker:
         Args:
             content: The user's message content.
         """
-        self.history.append_message(
-            session_id=self.session_id,
-            role=MessageRole.USER,
-            content=content
-        )
+        if self.history:
+            self.history.append_message(
+                session_id=self.session_id,
+                role=MessageRole.USER,
+                content=content
+            )
 
     def accumulate_text(self, text: str) -> None:
         """Accumulate text delta parts.
@@ -68,13 +69,14 @@ class HistoryTracker:
         Args:
             data: Tool use data containing tool_name, tool_use_id/id, and input.
         """
-        self.history.append_message(
-            session_id=self.session_id,
-            role=MessageRole.TOOL_USE,
-            content=json.dumps(data.get("input", {})),
-            tool_name=data.get("tool_name") or data.get("name"),
-            tool_use_id=data.get("tool_use_id") or data.get("id")
-        )
+        if self.history:
+            self.history.append_message(
+                session_id=self.session_id,
+                role=MessageRole.TOOL_USE,
+                content=json.dumps(data.get("input", {})),
+                tool_name=data.get("tool_name") or data.get("name"),
+                tool_use_id=data.get("tool_use_id") or data.get("id")
+            )
 
     def save_tool_result(self, data: dict) -> None:
         """Save a tool result event to history.
@@ -82,13 +84,14 @@ class HistoryTracker:
         Args:
             data: Tool result data containing tool_use_id, content, and is_error.
         """
-        self.history.append_message(
-            session_id=self.session_id,
-            role=MessageRole.TOOL_RESULT,
-            content=str(data.get("content", "")),
-            tool_use_id=data.get("tool_use_id"),
-            is_error=data.get("is_error", False)
-        )
+        if self.history:
+            self.history.append_message(
+                session_id=self.session_id,
+                role=MessageRole.TOOL_RESULT,
+                content=str(data.get("content", "")),
+                tool_use_id=data.get("tool_use_id"),
+                is_error=data.get("is_error", False)
+            )
 
     def save_user_answer(self, data: dict) -> None:
         """Save a user_answer event to history as tool_result.
@@ -96,13 +99,14 @@ class HistoryTracker:
         Args:
             data: Answer data containing question_id and answers.
         """
-        self.history.append_message(
-            session_id=self.session_id,
-            role=MessageRole.TOOL_RESULT,
-            content=json.dumps(data.get("answers", {})),
-            tool_use_id=data.get("question_id"),
-            is_error=False
-        )
+        if self.history:
+            self.history.append_message(
+                session_id=self.session_id,
+                role=MessageRole.TOOL_RESULT,
+                content=json.dumps(data.get("answers", {})),
+                tool_use_id=data.get("question_id"),
+                is_error=False
+            )
 
     def finalize_assistant_response(self, metadata: dict | None = None) -> None:
         """Finalize and save the accumulated assistant response.
@@ -110,7 +114,7 @@ class HistoryTracker:
         Args:
             metadata: Optional metadata to include with the message.
         """
-        if self._text_parts:
+        if self._text_parts and self.history:
             self.history.append_message(
                 session_id=self.session_id,
                 role=MessageRole.ASSISTANT,

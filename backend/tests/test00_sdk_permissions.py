@@ -4,6 +4,7 @@ Direct SDK test: Permission hooks - allowed vs denied operations.
 
 Run: python tests/test00_sdk_permissions.py
 """
+
 import sys
 from pathlib import Path
 
@@ -24,13 +25,14 @@ async def main() -> None:
     options = create_agent_sdk_options()
 
     print_info(f"Working directory: {options.cwd}")
-    print_info(f"Allowed directories: /tmp and cwd")
+    print_info("Allowed directories: /tmp and cwd")
     print_info(f"Tools: {', '.join(options.allowed_tools[:5])}...")
     print()
 
     client = ClaudeSDKClient(options)
 
     import time
+
     ts = int(time.time())
     prompt = f"""Do these 2 tasks and report results:
 1. Create file /tmp/test_allowed_{ts}.txt with content 'Allowed write'
@@ -57,6 +59,7 @@ Report: Task 1: SUCCESS/FAILURE, Task 2: SUCCESS/FAILURE"""
         print()
         print_info(f"Test failed: {e}")
         import traceback
+
         traceback.print_exc()
     finally:
         if hasattr(client, "disconnect"):

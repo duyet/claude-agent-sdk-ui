@@ -126,7 +126,7 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Run the application with uvicorn
     uvicorn.run(
         "api.main:app",

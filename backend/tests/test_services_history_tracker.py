@@ -1,8 +1,8 @@
 """Tests for HistoryTracker service."""
+
 import json
 from unittest.mock import MagicMock
 
-import pytest
 
 from api.constants import EventType, MessageRole
 from api.services.history_tracker import HistoryTracker
@@ -19,9 +19,7 @@ class TestHistoryTracker:
         tracker.save_user_message("Hello, world!")
 
         mock_history.append_message.assert_called_once_with(
-            session_id="test-session",
-            role=MessageRole.USER,
-            content="Hello, world!"
+            session_id="test-session", role=MessageRole.USER, content="Hello, world!"
         )
 
     def test_accumulate_text(self):
@@ -64,7 +62,7 @@ class TestHistoryTracker:
         tool_data = {
             "tool_name": "bash",
             "tool_use_id": "tool_123",
-            "input": {"command": "ls -la"}
+            "input": {"command": "ls -la"},
         }
 
         tracker.save_tool_use(tool_data)
@@ -74,7 +72,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_USE,
             content=json.dumps({"command": "ls -la"}),
             tool_name="bash",
-            tool_use_id="tool_123"
+            tool_use_id="tool_123",
         )
 
     def test_save_tool_use_with_id_field(self):
@@ -85,7 +83,7 @@ class TestHistoryTracker:
         tool_data = {
             "name": "read",
             "id": "tool_456",
-            "input": {"file_path": "/path/to/file"}
+            "input": {"file_path": "/path/to/file"},
         }
 
         tracker.save_tool_use(tool_data)
@@ -95,7 +93,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_USE,
             content=json.dumps({"file_path": "/path/to/file"}),
             tool_name="read",
-            tool_use_id="tool_456"
+            tool_use_id="tool_456",
         )
 
     def test_save_tool_result(self):
@@ -106,7 +104,7 @@ class TestHistoryTracker:
         result_data = {
             "tool_use_id": "tool_123",
             "content": "Output from tool",
-            "is_error": False
+            "is_error": False,
         }
 
         tracker.save_tool_result(result_data)
@@ -116,7 +114,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_RESULT,
             content="Output from tool",
             tool_use_id="tool_123",
-            is_error=False
+            is_error=False,
         )
 
     def test_save_tool_result_with_error(self):
@@ -127,7 +125,7 @@ class TestHistoryTracker:
         result_data = {
             "tool_use_id": "tool_123",
             "content": "Error occurred",
-            "is_error": True
+            "is_error": True,
         }
 
         tracker.save_tool_result(result_data)
@@ -137,7 +135,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_RESULT,
             content="Error occurred",
             tool_use_id="tool_123",
-            is_error=True
+            is_error=True,
         )
 
     def test_save_tool_result_default_is_error(self):
@@ -145,10 +143,7 @@ class TestHistoryTracker:
         mock_history = MagicMock()
         tracker = HistoryTracker(session_id="test-session", history=mock_history)
 
-        result_data = {
-            "tool_use_id": "tool_123",
-            "content": "Tool output"
-        }
+        result_data = {"tool_use_id": "tool_123", "content": "Tool output"}
 
         tracker.save_tool_result(result_data)
 
@@ -157,7 +152,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_RESULT,
             content="Tool output",
             tool_use_id="tool_123",
-            is_error=False
+            is_error=False,
         )
 
     def test_save_user_answer(self):
@@ -167,7 +162,7 @@ class TestHistoryTracker:
 
         answer_data = {
             "question_id": "q_123",
-            "answers": {"choice": "option_a", "reason": "because"}
+            "answers": {"choice": "option_a", "reason": "because"},
         }
 
         tracker.save_user_answer(answer_data)
@@ -177,7 +172,7 @@ class TestHistoryTracker:
             role=MessageRole.TOOL_RESULT,
             content=json.dumps({"choice": "option_a", "reason": "because"}),
             tool_use_id="q_123",
-            is_error=False
+            is_error=False,
         )
 
     def test_finalize_assistant_response_with_text(self):
@@ -196,7 +191,7 @@ class TestHistoryTracker:
             session_id="test-session",
             role=MessageRole.ASSISTANT,
             content="Hello, world!",
-            metadata=metadata
+            metadata=metadata,
         )
 
     def test_finalize_assistant_response_without_text(self):
@@ -233,11 +228,14 @@ class TestHistoryTracker:
         mock_history = MagicMock()
         tracker = HistoryTracker(session_id="test-session", history=mock_history)
 
-        tracker.process_event(EventType.TOOL_USE, {
-            "tool_name": "bash",
-            "tool_use_id": "tool_123",
-            "input": {"command": "echo test"}
-        })
+        tracker.process_event(
+            EventType.TOOL_USE,
+            {
+                "tool_name": "bash",
+                "tool_use_id": "tool_123",
+                "input": {"command": "echo test"},
+            },
+        )
 
         mock_history.append_message.assert_called_once()
 
@@ -246,11 +244,10 @@ class TestHistoryTracker:
         mock_history = MagicMock()
         tracker = HistoryTracker(session_id="test-session", history=mock_history)
 
-        tracker.process_event(EventType.TOOL_RESULT, {
-            "tool_use_id": "tool_123",
-            "content": "done",
-            "is_error": False
-        })
+        tracker.process_event(
+            EventType.TOOL_RESULT,
+            {"tool_use_id": "tool_123", "content": "done", "is_error": False},
+        )
 
         mock_history.append_message.assert_called_once()
 
@@ -259,10 +256,10 @@ class TestHistoryTracker:
         mock_history = MagicMock()
         tracker = HistoryTracker(session_id="test-session", history=mock_history)
 
-        tracker.process_event(EventType.USER_ANSWER, {
-            "question_id": "q_123",
-            "answers": {"choice": "yes"}
-        })
+        tracker.process_event(
+            EventType.USER_ANSWER,
+            {"question_id": "q_123", "answers": {"choice": "yes"}},
+        )
 
         mock_history.append_message.assert_called_once()
 
@@ -278,7 +275,7 @@ class TestHistoryTracker:
             session_id="test-session",
             role=MessageRole.ASSISTANT,
             content="Final text",
-            metadata=None
+            metadata=None,
         )
 
     def test_process_event_unknown_type(self):

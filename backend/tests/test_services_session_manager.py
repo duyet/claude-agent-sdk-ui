@@ -3,6 +3,7 @@
 Tests all methods including session lifecycle, cache management, eviction,
 and singleton pattern.
 """
+
 import asyncio
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -29,7 +30,7 @@ class TestSessionMetadata:
             agent_id="agent-abc",
             sdk_session_id="sdk-xyz",
             turn_count=5,
-            last_accessed=1234567890.0
+            last_accessed=1234567890.0,
         )
 
         assert metadata.pending_id == "pending-123"
@@ -94,8 +95,7 @@ class TestResolveSessionId:
         sdk_id = "sdk-session-123"
 
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            sdk_session_id=sdk_id
+            pending_id=pending_id, sdk_session_id=sdk_id
         )
         manager._sdk_to_pending[sdk_id] = pending_id
 
@@ -145,8 +145,7 @@ class TestRegisterSdkSessionId:
         sdk_id = "sdk-456"
 
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            sdk_session_id=None
+            pending_id=pending_id, sdk_session_id=None
         )
 
         manager.register_sdk_session_id(pending_id, sdk_id)
@@ -186,8 +185,7 @@ class TestIsSessionCached:
         sdk_id = "-sdk-session"
 
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            sdk_session_id=sdk_id
+            pending_id=pending_id, sdk_session_id=sdk_id
         )
         manager._sdk_to_pending[sdk_id] = pending_id
 
@@ -235,15 +233,13 @@ class TestEvictStaleSessions:
         manager._metadata[old_id] = SessionMetadata(
             pending_id=old_id,
             sdk_session_id="sdk-old",
-            last_accessed=current_time - SESSION_TTL_SECONDS - 100
+            last_accessed=current_time - SESSION_TTL_SECONDS - 100,
         )
 
         # Add fresh session
         fresh_id = "pending-fresh"
         manager._metadata[fresh_id] = SessionMetadata(
-            pending_id=fresh_id,
-            sdk_session_id="sdk-fresh",
-            last_accessed=current_time
+            pending_id=fresh_id, sdk_session_id="sdk-fresh", last_accessed=current_time
         )
 
         manager._sdk_to_pending["sdk-old"] = old_id
@@ -270,7 +266,7 @@ class TestEvictStaleSessions:
             session_ids.append(session_id)
             manager._metadata[session_id] = SessionMetadata(
                 pending_id=session_id,
-                last_accessed=current_time - (num_sessions - i)  # Older sessions first
+                last_accessed=current_time - (num_sessions - i),  # Older sessions first
             )
 
         # Evict should remove oldest 10
@@ -295,7 +291,7 @@ class TestEvictStaleSessions:
         manager._metadata[old_id] = SessionMetadata(
             pending_id=old_id,
             sdk_session_id=sdk_id,
-            last_accessed=current_time - SESSION_TTL_SECONDS - 1
+            last_accessed=current_time - SESSION_TTL_SECONDS - 1,
         )
         manager._sdk_to_pending[sdk_id] = old_id
 
@@ -313,7 +309,7 @@ class TestEvictStaleSessions:
         manager._metadata[old_id] = SessionMetadata(
             pending_id=old_id,
             sdk_session_id=None,
-            last_accessed=current_time - SESSION_TTL_SECONDS - 1
+            last_accessed=current_time - SESSION_TTL_SECONDS - 1,
         )
 
         manager._evict_stale_sessions()
@@ -327,8 +323,7 @@ class TestEvictStaleSessions:
 
         session_id = "pending-fresh-only"
         manager._metadata[session_id] = SessionMetadata(
-            pending_id=session_id,
-            last_accessed=current_time
+            pending_id=session_id, last_accessed=current_time
         )
 
         manager._evict_stale_sessions()
@@ -341,7 +336,9 @@ class TestCreateSession:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_create_session_with_defaults(self, mock_create_options, mock_session_class):
+    async def test_create_session_with_defaults(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating session with default parameters."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -353,13 +350,17 @@ class TestCreateSession:
 
         assert isinstance(session_id, str)
         assert session_id in manager._sessions
-        mock_create_options.assert_called_once_with(agent_id=None, resume_session_id=None)
+        mock_create_options.assert_called_once_with(
+            agent_id=None, resume_session_id=None
+        )
         mock_session_class.assert_called_once_with(mock_options)
         mock_session.connect.assert_called_once()
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_create_session_with_agent_id(self, mock_create_options, mock_session_class):
+    async def test_create_session_with_agent_id(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating session with agent ID."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -371,11 +372,15 @@ class TestCreateSession:
 
         await manager.create_session(agent_id=agent_id)
 
-        mock_create_options.assert_called_once_with(agent_id=agent_id, resume_session_id=None)
+        mock_create_options.assert_called_once_with(
+            agent_id=agent_id, resume_session_id=None
+        )
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_create_session_with_resume_id(self, mock_create_options, mock_session_class):
+    async def test_create_session_with_resume_id(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating session with resume session ID."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -387,11 +392,15 @@ class TestCreateSession:
 
         await manager.create_session(resume_session_id=resume_id)
 
-        mock_create_options.assert_called_once_with(agent_id=None, resume_session_id=resume_id)
+        mock_create_options.assert_called_once_with(
+            agent_id=None, resume_session_id=resume_id
+        )
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_create_session_calls_eviction(self, mock_create_options, mock_session_class):
+    async def test_create_session_calls_eviction(
+        self, mock_create_options, mock_session_class
+    ):
         """Test create_session triggers eviction before creation."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -406,7 +415,9 @@ class TestCreateSession:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_create_session_unique_ids(self, mock_create_options, mock_session_class):
+    async def test_create_session_unique_ids(
+        self, mock_create_options, mock_session_class
+    ):
         """Test each create_session returns unique ID."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -511,7 +522,9 @@ class TestCreateConversationSession:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    def test_create_conversation_session_defaults(self, mock_create_options, mock_session_class):
+    def test_create_conversation_session_defaults(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating conversation session with defaults."""
         manager = SessionManager()
         mock_options = MagicMock()
@@ -520,21 +533,22 @@ class TestCreateConversationSession:
         mock_session_class.return_value = mock_session
 
         result = manager._create_conversation_session(
-            agent_id=None,
-            resume_session_id=None
+            agent_id=None, resume_session_id=None
         )
 
-        mock_create_options.assert_called_once_with(agent_id=None, resume_session_id=None)
+        mock_create_options.assert_called_once_with(
+            agent_id=None, resume_session_id=None
+        )
         mock_session_class.assert_called_once_with(
-            options=mock_options,
-            include_partial_messages=True,
-            agent_id=None
+            options=mock_options, include_partial_messages=True, agent_id=None
         )
         assert result is mock_session
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    def test_create_conversation_session_with_agent(self, mock_create_options, mock_session_class):
+    def test_create_conversation_session_with_agent(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating conversation session with agent ID."""
         manager = SessionManager()
         mock_options = MagicMock()
@@ -546,16 +560,18 @@ class TestCreateConversationSession:
 
         manager._create_conversation_session(agent_id=agent_id)
 
-        mock_create_options.assert_called_once_with(agent_id=agent_id, resume_session_id=None)
+        mock_create_options.assert_called_once_with(
+            agent_id=agent_id, resume_session_id=None
+        )
         mock_session_class.assert_called_once_with(
-            options=mock_options,
-            include_partial_messages=True,
-            agent_id=agent_id
+            options=mock_options, include_partial_messages=True, agent_id=agent_id
         )
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    def test_create_conversation_session_with_resume(self, mock_create_options, mock_session_class):
+    def test_create_conversation_session_with_resume(
+        self, mock_create_options, mock_session_class
+    ):
         """Test creating conversation session with resume ID."""
         manager = SessionManager()
         mock_options = MagicMock()
@@ -565,12 +581,11 @@ class TestCreateConversationSession:
 
         resume_id = "resume-session-abc"
 
-        manager._create_conversation_session(
-            agent_id=None,
-            resume_session_id=resume_id
-        )
+        manager._create_conversation_session(agent_id=None, resume_session_id=resume_id)
 
-        mock_create_options.assert_called_once_with(agent_id=None, resume_session_id=resume_id)
+        mock_create_options.assert_called_once_with(
+            agent_id=None, resume_session_id=resume_id
+        )
 
 
 class TestGetOrCreateConversationSession:
@@ -578,7 +593,9 @@ class TestGetOrCreateConversationSession:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_get_existing_cached_session(self, mock_create_options, mock_session_class):
+    async def test_get_existing_cached_session(
+        self, mock_create_options, mock_session_class
+    ):
         """Test getting existing session from cache."""
         manager = SessionManager()
         pending_id = "pending-cached"
@@ -590,7 +607,7 @@ class TestGetOrCreateConversationSession:
             pending_id=pending_id,
             agent_id=agent_id,
             sdk_session_id=sdk_id,
-            turn_count=turn_count
+            turn_count=turn_count,
         )
 
         mock_options = MagicMock()
@@ -608,8 +625,7 @@ class TestGetOrCreateConversationSession:
         assert session.sdk_session_id == sdk_id
         assert session.turn_count == turn_count
         mock_create_options.assert_called_once_with(
-            agent_id=agent_id,
-            resume_session_id=sdk_id
+            agent_id=agent_id, resume_session_id=sdk_id
         )
 
     @patch("api.services.session_manager.ConversationSession")
@@ -623,8 +639,7 @@ class TestGetOrCreateConversationSession:
         old_time = time.time() - 1000
 
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            last_accessed=old_time
+            pending_id=pending_id, last_accessed=old_time
         )
 
         mock_options = MagicMock()
@@ -649,8 +664,7 @@ class TestGetOrCreateConversationSession:
         mock_session_class.return_value = mock_session
 
         session, resolved_id, found = await manager.get_or_create_conversation_session(
-            "nonexistent",
-            agent_id=agent_id
+            "nonexistent", agent_id=agent_id
         )
 
         assert found is False
@@ -658,7 +672,9 @@ class TestGetOrCreateConversationSession:
         assert resolved_id in manager._metadata
         assert session is mock_session
         assert manager._metadata[resolved_id].agent_id == agent_id
-        mock_create_options.assert_called_once_with(agent_id=agent_id, resume_session_id=None)
+        mock_create_options.assert_called_once_with(
+            agent_id=agent_id, resume_session_id=None
+        )
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
@@ -669,8 +685,7 @@ class TestGetOrCreateConversationSession:
         sdk_id = "resolve-me"
 
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            sdk_session_id=sdk_id
+            pending_id=pending_id, sdk_session_id=sdk_id
         )
         manager._sdk_to_pending[sdk_id] = pending_id
 
@@ -679,14 +694,18 @@ class TestGetOrCreateConversationSession:
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
-        session, resolved_id, found = await manager.get_or_create_conversation_session(sdk_id)
+        session, resolved_id, found = await manager.get_or_create_conversation_session(
+            sdk_id
+        )
 
         assert found is True
         assert resolved_id == pending_id
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_calls_eviction_before_lookup(self, mock_create_options, mock_session_class):
+    async def test_calls_eviction_before_lookup(
+        self, mock_create_options, mock_session_class
+    ):
         """Test eviction is called before lookup/creation."""
         manager = SessionManager()
 
@@ -721,6 +740,7 @@ class TestGetSessionManagerSingleton:
         """Test singleton is created only on first call."""
         # Reset global singleton
         import api.services.session_manager as sm_module
+
         original_singleton = sm_module._session_manager
         sm_module._session_manager = None
 
@@ -743,7 +763,9 @@ class TestSessionManagerConcurrency:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_concurrent_session_creation(self, mock_create_options, mock_session_class):
+    async def test_concurrent_session_creation(
+        self, mock_create_options, mock_session_class
+    ):
         """Test multiple concurrent session creations."""
         manager = SessionManager()
         mock_session = AsyncMock()
@@ -760,7 +782,9 @@ class TestSessionManagerConcurrency:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_concurrent_get_or_create_same_session(self, mock_create_options, mock_session_class):
+    async def test_concurrent_get_or_create_same_session(
+        self, mock_create_options, mock_session_class
+    ):
         """Test concurrent get_or_create for same session ID."""
         manager = SessionManager()
 
@@ -773,8 +797,7 @@ class TestSessionManagerConcurrency:
 
         # Try to get/create same session concurrently
         tasks = [
-            manager.get_or_create_conversation_session(session_id)
-            for _ in range(5)
+            manager.get_or_create_conversation_session(session_id) for _ in range(5)
         ]
         results = await asyncio.gather(*tasks)
 
@@ -784,7 +807,9 @@ class TestSessionManagerConcurrency:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_lock_prevents_race_condition(self, mock_create_options, mock_session_class):
+    async def test_lock_prevents_race_condition(
+        self, mock_create_options, mock_session_class
+    ):
         """Test that lock prevents race conditions."""
         manager = SessionManager()
 
@@ -796,14 +821,12 @@ class TestSessionManagerConcurrency:
         # Create a cached session first
         pending_id = "pending-locked"
         manager._metadata[pending_id] = SessionMetadata(
-            pending_id=pending_id,
-            agent_id="agent-1"
+            pending_id=pending_id, agent_id="agent-1"
         )
 
         # Multiple concurrent reads
         tasks = [
-            manager.get_or_create_conversation_session(pending_id)
-            for _ in range(10)
+            manager.get_or_create_conversation_session(pending_id) for _ in range(10)
         ]
         results = await asyncio.gather(*tasks)
 
@@ -845,7 +868,9 @@ class TestSessionManagerEdgeCases:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_get_or_create_with_none_agent_id(self, mock_create_options, mock_session_class):
+    async def test_get_or_create_with_none_agent_id(
+        self, mock_create_options, mock_session_class
+    ):
         """Test get_or_create with None agent_id."""
         manager = SessionManager()
 
@@ -855,8 +880,7 @@ class TestSessionManagerEdgeCases:
         mock_session_class.return_value = mock_session
 
         session, resolved_id, found = await manager.get_or_create_conversation_session(
-            "test-session",
-            agent_id=None
+            "test-session", agent_id=None
         )
 
         assert found is False
@@ -865,7 +889,9 @@ class TestSessionManagerEdgeCases:
 
     @patch("api.services.session_manager.ConversationSession")
     @patch("api.services.session_manager.create_agent_sdk_options")
-    async def test_multiple_evictions_in_sequence(self, mock_create_options, mock_session_class):
+    async def test_multiple_evictions_in_sequence(
+        self, mock_create_options, mock_session_class
+    ):
         """Test multiple eviction cycles."""
         manager = SessionManager()
         current_time = time.time()
@@ -875,7 +901,7 @@ class TestSessionManagerEdgeCases:
             session_id = f"pending-{i}"
             manager._metadata[session_id] = SessionMetadata(
                 pending_id=session_id,
-                last_accessed=current_time - (MAX_SESSIONS + 20 - i) * 10
+                last_accessed=current_time - (MAX_SESSIONS + 20 - i) * 10,
             )
 
         # First eviction

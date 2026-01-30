@@ -1,6 +1,7 @@
 """Tests for WebSocket utility functions."""
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock
 from starlette.websockets import WebSocketDisconnect
 
 from api.utils.websocket import close_with_error
@@ -23,9 +24,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason="Invalid token"
+                websocket=websocket, code=1008, reason="Invalid token"
             )
 
         # Verify WebSocket.close was called
@@ -45,7 +44,7 @@ class TestCloseWithError:
             websocket=websocket,
             code=1000,
             reason="Normal closure",
-            raise_disconnect=False
+            raise_disconnect=False,
         )
 
         # Verify WebSocket.close was called
@@ -66,11 +65,7 @@ class TestCloseWithError:
             websocket = create_mock_websocket()
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await close_with_error(
-                    websocket=websocket,
-                    code=code,
-                    reason=reason
-                )
+                await close_with_error(websocket=websocket, code=code, reason=reason)
 
             assert exc_info.value.code == code
             assert exc_info.value.reason == reason
@@ -82,11 +77,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=""
-            )
+            await close_with_error(websocket=websocket, code=1008, reason="")
 
         websocket.close.assert_called_once_with(code=1008, reason="")
         assert exc_info.value.reason == ""
@@ -98,11 +89,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=1011,
-                reason=long_reason
-            )
+            await close_with_error(websocket=websocket, code=1011, reason=long_reason)
 
         websocket.close.assert_called_once_with(code=1011, reason=long_reason)
         assert exc_info.value.reason == long_reason
@@ -115,9 +102,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=unicode_reason
+                websocket=websocket, code=1008, reason=unicode_reason
             )
 
         websocket.close.assert_called_once_with(code=1008, reason=unicode_reason)
@@ -131,9 +116,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=special_reason
+                websocket=websocket, code=1008, reason=special_reason
             )
 
         websocket.close.assert_called_once_with(code=1008, reason=special_reason)
@@ -145,11 +128,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=0,
-                reason="Zero code"
-            )
+            await close_with_error(websocket=websocket, code=0, reason="Zero code")
 
         websocket.close.assert_called_once_with(code=0, reason="Zero code")
         assert exc_info.value.code == 0
@@ -160,11 +139,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=65535,
-                reason="Max code"
-            )
+            await close_with_error(websocket=websocket, code=65535, reason="Max code")
 
         websocket.close.assert_called_once_with(code=65535, reason="Max code")
         assert exc_info.value.code == 65535
@@ -175,11 +150,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=-1,
-                reason="Negative code"
-            )
+            await close_with_error(websocket=websocket, code=-1, reason="Negative code")
 
         websocket.close.assert_called_once_with(code=-1, reason="Negative code")
         assert exc_info.value.code == -1
@@ -191,11 +162,7 @@ class TestCloseWithError:
         websocket.close.side_effect = RuntimeError("Connection already closed")
 
         with pytest.raises(RuntimeError, match="Connection already closed"):
-            await close_with_error(
-                websocket=websocket,
-                code=1000,
-                reason="Test"
-            )
+            await close_with_error(websocket=websocket, code=1000, reason="Test")
 
         websocket.close.assert_called_once()
 
@@ -206,10 +173,7 @@ class TestCloseWithError:
 
         # First call
         await close_with_error(
-            websocket=websocket,
-            code=1008,
-            reason="First error",
-            raise_disconnect=False
+            websocket=websocket, code=1008, reason="First error", raise_disconnect=False
         )
 
         # Second call
@@ -217,7 +181,7 @@ class TestCloseWithError:
             websocket=websocket,
             code=1011,
             reason="Second error",
-            raise_disconnect=False
+            raise_disconnect=False,
         )
 
         # Verify both calls were made
@@ -231,10 +195,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         result = await close_with_error(
-            websocket=websocket,
-            code=1000,
-            reason="Test",
-            raise_disconnect=False
+            websocket=websocket, code=1000, reason="Test", raise_disconnect=False
         )
 
         assert result is None
@@ -246,10 +207,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect):
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason="Test",
-                raise_disconnect=True
+                websocket=websocket, code=1008, reason="Test", raise_disconnect=True
             )
 
     @pytest.mark.asyncio
@@ -259,10 +217,7 @@ class TestCloseWithError:
 
         # Should not raise
         await close_with_error(
-            websocket=websocket,
-            code=1008,
-            reason="Test",
-            raise_disconnect=False
+            websocket=websocket, code=1008, reason="Test", raise_disconnect=False
         )
 
     @pytest.mark.asyncio
@@ -272,14 +227,12 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=4003,
-                reason="Custom error"
+                websocket=websocket, code=4003, reason="Custom error"
             )
 
         # Access exception attributes
-        assert hasattr(exc_info.value, 'code')
-        assert hasattr(exc_info.value, 'reason')
+        assert hasattr(exc_info.value, "code")
+        assert hasattr(exc_info.value, "reason")
         assert exc_info.value.code == 4003
         assert exc_info.value.reason == "Custom error"
 
@@ -303,11 +256,7 @@ class TestCloseWithError:
             websocket = create_mock_websocket()
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await close_with_error(
-                    websocket=websocket,
-                    code=code,
-                    reason=reason
-                )
+                await close_with_error(websocket=websocket, code=code, reason=reason)
 
             assert exc_info.value.code == code
             websocket.close.assert_called_once_with(code=code, reason=reason)
@@ -318,10 +267,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         await close_with_error(
-            websocket=websocket,
-            code=1000,
-            reason="Test async",
-            raise_disconnect=False
+            websocket=websocket, code=1000, reason="Test async", raise_disconnect=False
         )
 
         # Verify the async close was awaited
@@ -334,9 +280,7 @@ class TestCloseWithError:
 
         try:
             await close_with_error(
-                websocket=websocket,
-                code=4001,
-                reason="Test exception propagation"
+                websocket=websocket, code=4001, reason="Test exception propagation"
             )
             pytest.fail("Expected WebSocketDisconnect to be raised")
         except WebSocketDisconnect as e:
@@ -353,9 +297,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=reason_with_newlines
+                websocket=websocket, code=1008, reason=reason_with_newlines
             )
 
         assert exc_info.value.reason == reason_with_newlines
@@ -369,9 +311,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=reason_with_null
+                websocket=websocket, code=1008, reason=reason_with_null
             )
 
         assert exc_info.value.reason == reason_with_null
@@ -383,11 +323,7 @@ class TestCloseWithError:
         websocket = create_mock_websocket()
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
-            await close_with_error(
-                websocket=websocket,
-                code=1000,
-                reason="X"
-            )
+            await close_with_error(websocket=websocket, code=1000, reason="X")
 
         assert exc_info.value.reason == "X"
         websocket.close.assert_called_once_with(code=1000, reason="X")
@@ -400,9 +336,7 @@ class TestCloseWithError:
 
         with pytest.raises(WebSocketDisconnect) as exc_info:
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason=json_like_reason
+                websocket=websocket, code=1008, reason=json_like_reason
             )
 
         assert exc_info.value.reason == json_like_reason
@@ -416,9 +350,7 @@ class TestCloseWithError:
         # Don't specify raise_disconnect, should default to True
         with pytest.raises(WebSocketDisconnect):
             await close_with_error(
-                websocket=websocket,
-                code=1008,
-                reason="Test default"
+                websocket=websocket, code=1008, reason="Test default"
             )
 
     @pytest.mark.asyncio
@@ -429,19 +361,13 @@ class TestCloseWithError:
         # Test with True
         with pytest.raises(WebSocketDisconnect):
             await close_with_error(
-                websocket=websocket,
-                code=1000,
-                reason="Test",
-                raise_disconnect=True
+                websocket=websocket, code=1000, reason="Test", raise_disconnect=True
             )
 
         # Test with False
         websocket_mock = create_mock_websocket()
         await close_with_error(
-            websocket=websocket_mock,
-            code=1000,
-            reason="Test",
-            raise_disconnect=False
+            websocket=websocket_mock, code=1000, reason="Test", raise_disconnect=False
         )
         websocket_mock.close.assert_called_once()
 
@@ -452,13 +378,12 @@ class TestCloseWithErrorIntegration:
     @pytest.mark.asyncio
     async def test_close_sequence_in_handler(self):
         """Test using close_with_error in a realistic WebSocket handler scenario."""
+
         async def websocket_handler(ws: MagicMock, authenticated: bool):
             """Simulated WebSocket handler that uses close_with_error."""
             if not authenticated:
                 await close_with_error(
-                    websocket=ws,
-                    code=1008,
-                    reason="Authentication failed"
+                    websocket=ws, code=1008, reason="Authentication failed"
                 )
             await ws.close(code=1000, reason="Success")
 
@@ -478,6 +403,7 @@ class TestCloseWithErrorIntegration:
     @pytest.mark.asyncio
     async def test_error_handling_pattern(self):
         """Test error handling pattern with close_with_error."""
+
         async def safe_handler(ws: MagicMock, should_fail: bool):
             """Handler that uses close_with_error for error cases."""
             try:
@@ -489,13 +415,15 @@ class TestCloseWithErrorIntegration:
                     websocket=ws,
                     code=1011,
                     reason="Internal processing error",
-                    raise_disconnect=False
+                    raise_disconnect=False,
                 )
 
         # Test error path
         websocket = create_mock_websocket()
         await safe_handler(websocket, should_fail=True)
-        websocket.close.assert_called_with(code=1011, reason="Internal processing error")
+        websocket.close.assert_called_with(
+            code=1011, reason="Internal processing error"
+        )
 
         # Test success path
         websocket_mock = create_mock_websocket()
@@ -516,11 +444,7 @@ class TestCloseWithErrorIntegration:
             websocket = create_mock_websocket()
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await close_with_error(
-                    websocket=websocket,
-                    code=code,
-                    reason=reason
-                )
+                await close_with_error(websocket=websocket, code=code, reason=reason)
 
             assert exc_info.value.code == code
             assert exc_info.value.reason == reason
