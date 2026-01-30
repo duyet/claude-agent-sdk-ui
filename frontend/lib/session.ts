@@ -1,55 +1,55 @@
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
-import { deriveJwtSecret } from './jwt-utils';
+import { jwtVerify } from "jose"
+import { cookies } from "next/headers"
+import { getJwtSecret } from "./jwt-utils"
 
-export const SESSION_COOKIE = 'claude_agent_session';
-export const REFRESH_COOKIE = 'claude_agent_refresh';
+export const SESSION_COOKIE = "claude_agent_session"
+export const REFRESH_COOKIE = "claude_agent_refresh"
 
 export interface SessionPayload {
-  user_id: string;
-  username: string;
-  full_name: string | null;
-  role: 'admin' | 'user';
+  user_id: string
+  username: string
+  full_name: string | null
+  role: "admin" | "user"
 }
 
 /**
  * Get the current session from the cookie
  */
 export async function getSession(): Promise<SessionPayload | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const cookieStore = await cookies()
+  const token = cookieStore.get(SESSION_COOKIE)?.value
 
   if (!token) {
-    return null;
+    return null
   }
 
-  return verifySession(token);
+  return verifySession(token)
 }
 
 /**
  * Set the session cookie (server-side)
  */
 export async function setSessionCookie(token: string, refreshToken?: string): Promise<void> {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies()
 
   // Set access token cookie (30 min)
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
     maxAge: 30 * 60, // 30 minutes
-  });
+  })
 
   // Set refresh token cookie (7 days)
   if (refreshToken) {
     cookieStore.set(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60, // 7 days
-    });
+    })
   }
 }
 
@@ -57,40 +57,34 @@ export async function setSessionCookie(token: string, refreshToken?: string): Pr
  * Clear session cookies (server-side)
  */
 export async function clearSessionCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
-  cookieStore.delete(REFRESH_COOKIE);
+  const cookieStore = await cookies()
+  cookieStore.delete(SESSION_COOKIE)
+  cookieStore.delete(REFRESH_COOKIE)
 }
 
 /**
  * Verify a session token and extract payload
  */
 export async function verifySession(token: string): Promise<SessionPayload | null> {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error('API_KEY not configured');
-    return null;
-  }
-
   try {
-    const jwtSecret = deriveJwtSecret(apiKey);
-    const secret = new TextEncoder().encode(jwtSecret);
+    const jwtSecret = getJwtSecret()
+    const secret = new TextEncoder().encode(jwtSecret)
 
     const { payload } = await jwtVerify(token, secret, {
-      issuer: 'claude-agent-sdk',
-      audience: 'claude-agent-sdk-users',
-    });
+      issuer: "claude-agent-sdk",
+      audience: "claude-agent-sdk-users",
+    })
 
     // Extract user info from token
     return {
       user_id: payload.user_id as string,
       username: payload.username as string,
       full_name: (payload.full_name as string) || null,
-      role: payload.role as 'admin' | 'user',
-    };
+      role: payload.role as "admin" | "user",
+    }
   } catch (error) {
-    console.error('Session verification failed:', error);
-    return null;
+    console.error("Session verification failed:", error)
+    return null
   }
 }
 
@@ -98,6 +92,6 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
  * Get refresh token from cookie
  */
 export async function getRefreshToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get(REFRESH_COOKIE)?.value || null;
+  const cookieStore = await cookies()
+  return cookieStore.get(REFRESH_COOKIE)?.value || null
 }
