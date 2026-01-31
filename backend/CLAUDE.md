@@ -112,7 +112,42 @@ JWT_SECRET=your-jwt-secret     # For token signing
 ANTHROPIC_API_KEY=sk-...       # Claude API key
 # or
 ZAI_API_KEY=...                # Alternative provider
+# or
+OPENROUTER_API_KEY=sk-or-...   # OpenRouter API key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
+
+## Provider Configuration
+
+Configure the active provider in `config.yaml`:
+
+```yaml
+# Set active provider: "claude", "zai", "minimax", "proxy", "openrouter"
+provider: openrouter
+
+providers:
+  openrouter:
+    env_key: OPENROUTER_API_KEY
+    base_url_env: OPENROUTER_BASE_URL
+```
+
+### OpenRouter Setup
+
+[OpenRouter](https://openrouter.ai) provides access to 100+ models including GPT-4, Claude, Llama, Mistral, and more.
+
+1. Get an API key at https://openrouter.ai/keys
+2. Add to `.env`:
+   ```bash
+   OPENROUTER_API_KEY=sk-or-v1-your-key
+   OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+   ```
+3. Set `provider: openrouter` in `config.yaml`
+4. Use OpenRouter model names in `agents.yaml`:
+   ```yaml
+   model: anthropic/claude-3.5-sonnet  # or openai/gpt-4-turbo, etc.
+   ```
+
+Full model list: https://openrouter.ai/models
 
 ## Adding WebSocket Events
 

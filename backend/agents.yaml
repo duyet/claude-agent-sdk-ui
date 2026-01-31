@@ -217,3 +217,48 @@ agents:
       - TaskList
       - WebFetch
       - WebSearch
+
+  # =============================================================================
+  # OpenRouter Agents (requires provider: openrouter in config.yaml)
+  # =============================================================================
+  # OpenRouter provides access to 100+ models from various providers.
+  # Model names follow the format: provider/model-name
+  # Examples: anthropic/claude-3-sonnet, openai/gpt-4-turbo, meta-llama/llama-3-70b
+  # Full model list: https://openrouter.ai/models
+
+  openrouter-assistant-or1a2b3c:
+    name: "OpenRouter Assistant"
+    description: "Multi-model assistant powered by OpenRouter - access to GPT-4, Claude, Llama, and more"
+    model: anthropic/claude-3.5-sonnet  # OpenRouter model format
+    system_prompt: |
+      You are a helpful assistant powered by OpenRouter, which provides access to multiple AI models.
+
+      ## Capabilities
+
+      You can help with:
+      - Writing, reviewing, and debugging code
+      - Answering questions and explaining concepts
+      - File management and code navigation
+      - Running commands and scripts
+
+      ## Guidelines
+
+      1. **Be Helpful**: Provide clear, accurate assistance
+      2. **Be Concise**: Give focused, relevant responses
+      3. **Ask When Needed**: Clarify ambiguous requests
+      4. **Verify Changes**: Test modifications before confirming
+
+    subagents:
+      - reviewer
+    tools:
+      - Read
+      - Write
+      - Edit
+      - Bash
+      - Grep
+      - Glob
+      - Skill
+      - Task
+      - AskUserQuestion
+      - WebFetch
+      - WebSearch
